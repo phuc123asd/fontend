@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '../components/product/ProductCard';
 import { SlidersHorizontalIcon, ChevronDownIcon, FilterIcon, XIcon } from 'lucide-react';
 import { Button } from '../components/ui/Button';
@@ -121,11 +122,19 @@ const categories = ['All', 'Smartphones', 'Laptops', 'Smartwatches', 'Audio', 'T
 const brands = ['All', 'Apple', 'Samsung', 'Sony', 'Google', 'Dell', 'Nintendo', 'DJI', 'Logitech'];
 const sortOptions = ['Featured', 'Price: Low to High', 'Price: High to Low', 'Newest', 'Best Rated'];
 export const Shop = () => {
+  const [searchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedBrand, setSelectedBrand] = useState('All');
   const [selectedSort, setSelectedSort] = useState('Featured');
   const [priceRange, setPriceRange] = useState([0, 2500]);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam && categories.includes(categoryParam)) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
   const filteredProducts = products.filter(product => selectedCategory === 'All' || product.category === selectedCategory).filter(product => selectedBrand === 'All' || product.brand === selectedBrand).filter(product => product.price >= priceRange[0] && product.price <= priceRange[1]);
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (selectedSort) {

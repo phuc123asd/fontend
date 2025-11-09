@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useCart } from '../../contexts/CartContext';
+import { useWishlist } from '../../contexts/WishlistContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { SearchIcon, ShoppingCartIcon, UserIcon, MenuIcon, XIcon, SunIcon, MoonIcon, LogOutIcon } from 'lucide-react';
+import { SearchIcon, ShoppingCartIcon, HeartIcon, UserIcon, MenuIcon, XIcon, SunIcon, MoonIcon, LogOutIcon } from 'lucide-react';
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -16,6 +17,9 @@ export const Navbar = () => {
   const {
     cartCount
   } = useCart();
+  const {
+    wishlistCount
+  } = useWishlist();
   const {
     isAuthenticated,
     user,
@@ -75,6 +79,13 @@ export const Navbar = () => {
             <button onClick={toggleTheme} className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
               {theme === 'dark' ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
             </button>
+            {/* Wishlist */}
+            <Link to="/wishlist" className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors relative">
+              <HeartIcon className="w-5 h-5" />
+              {wishlistCount > 0 && <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {wishlistCount}
+                </span>}
+            </Link>
             {/* Cart */}
             <Link to="/cart" className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors relative">
               <ShoppingCartIcon className="w-5 h-5" />

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageCircleIcon, XIcon, SendIcon, BotIcon, UserIcon } from 'lucide-react';
 
 interface Message {
@@ -6,33 +6,24 @@ interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
+  role?: 'user' | 'assistant';
 }
-
-const botResponses: { [key: string]: string } = {
-  'shipping': 'We offer free shipping on all orders! Standard delivery takes 3-5 business days, while express delivery is available within 1-2 business days for an additional fee.',
-  'return': 'We have a 30-day return policy. If you\'re not satisfied with your purchase, you can return it within 30 days for a full refund. The item must be in its original condition.',
-  'warranty': 'All our products come with a 1-year manufacturer warranty. This covers any defects in materials or workmanship.',
-  'payment': 'We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and Apple Pay. All transactions are secure and encrypted.',
-  'track': 'You can track your order by visiting the Orders page in your account. You\'ll find a tracking number for each shipped order.',
-  'discount': 'Sign up for our newsletter to receive exclusive discounts and early access to sales! We also offer student discounts and seasonal promotions.',
-  'support': 'Our customer support team is available 24/7. You can reach us through this chat, email at support@techhub.com, or call us at 1-800-TECH-HUB.',
-  'default': 'I\'m here to help! You can ask me about shipping, returns, warranty, payment methods, order tracking, discounts, or general support. How can I assist you today?'
-};
 
 const initialBotMessage: Message = {
   id: 1,
-  text: 'Hello! I\'m your TechHub assistant. How can I help you today? You can ask me about shipping, returns, warranty, payments, or anything else!',
+  text: 'Xin chào! Tôi là trợ lý tư vấn của TechHub. Tôi có thể giúp gì cho bạn hôm nay? Bạn có thể hỏi về sản phẩm, giao hàng, đổi trả, bảo hành, thanh toán hoặc bất kỳ thắc mắc nào!',
   sender: 'bot',
-  timestamp: new Date()
+  timestamp: new Date(),
+  role: 'assistant'
 };
 
 const quickActions = [
-  { label: '📦 Shipping Info', query: 'shipping' },
-  { label: '↩️ Returns', query: 'return' },
-  { label: '🛡️ Warranty', query: 'warranty' },
-  { label: '💳 Payment', query: 'payment' },
-  { label: '📍 Track Order', query: 'track' },
-  { label: '💰 Discounts', query: 'discount' }
+  { label: '📦 Thông tin giao hàng', query: 'Cho tôi biết về chính sách giao hàng' },
+  { label: '↩️ Chính sách đổi trả', query: 'Chính sách đổi trả như thế nào?' },
+  { label: '🛡️ Bảo hành', query: 'Sản phẩm được bảo hành bao lâu?' },
+  { label: '💳 Thanh toán', query: 'Các hình thức thanh toán' },
+  { label: '📱 Tư vấn sản phẩm', query: 'Tôi muốn tư vấn về điện thoại' },
+  { label: '💰 Khuyến mãi', query: 'Có khuyến mãi gì không?' }
 ];
 
 export const Chatbot = () => {
@@ -73,38 +64,15 @@ export const Chatbot = () => {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const getBotResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    for (const [key, response] of Object.entries(botResponses)) {
-      if (lowerMessage.includes(key)) {
-        return response;
-      }
-    }
-    
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-      return 'Hello! How can I assist you today?';
-    }
-    
-    if (lowerMessage.includes('thanks') || lowerMessage.includes('thank you')) {
-      return 'You\'re welcome! Is there anything else I can help you with?';
-    }
-    
-    if (lowerMessage.includes('product') || lowerMessage.includes('item')) {
-      return 'We have a wide range of electronics including smartphones, laptops, tablets, smartwatches, and accessories. You can browse our full catalog on the Shop page!';
-    }
-    
-    return botResponses.default;
-  };
-
-  const sendMessage = (text: string) => {
+  const sendMessage = async (text: string) => {
     if (!text.trim()) return;
 
     const userMessage: Message = {
       id: Date.now(),
       text: text.trim(),
       sender: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
+      role: 'user'
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -112,17 +80,53 @@ export const Chatbot = () => {
     setShowQuickActions(false);
     setIsTyping(true);
 
-    setTimeout(() => {
+    try {
+      const conversationHistory = [...messages, userMessage]
+        .filter(msg => msg.role)
+        .map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.text
+        }));
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${apiUrl}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: conversationHistory
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+
       const botMessage: Message = {
         id: Date.now() + 1,
-        text: getBotResponse(text),
+        text: data.message,
         sender: 'bot',
-        timestamp: new Date()
+        timestamp: new Date(),
+        role: 'assistant'
       };
 
       setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage: Message = {
+        id: Date.now() + 1,
+        text: 'Xin lỗi, đã có lỗi xảy ra khi kết nối với trợ lý AI. Vui lòng thử lại sau.',
+        sender: 'bot',
+        timestamp: new Date(),
+        role: 'assistant'
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 1000);
+    }
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
