@@ -45,13 +45,17 @@ export const Shop = () => {
 
   const [products, setProducts] = useState<Product[]>(defaultProducts);
 
+  // State phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12); // Số sản phẩm mỗi trang
+
   // Fetch từ API và ép kiểu
   useEffect(() => {
   fetch('http://127.0.0.1:8000/api/products')
     .then(res => res.json())
     .then(data => {
       const apiProducts = data.data || data;
-      // Thêm type cho product parameter
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const formattedProducts = apiProducts.map((product: any) => ({
         ...product,
         price: Number(product.price),
@@ -64,15 +68,21 @@ export const Shop = () => {
       console.error('Lỗi load API, dùng data cứng:', err);
     });
   }, []);
-
+  
   useEffect(() => {
     const categoryParam = searchParams.get('category');
     if (categoryParam && categories.includes(categoryParam)) {
       setSelectedCategory(categoryParam);
     }
   }, [searchParams]);
-const filteredProducts = products
-  .filter(product => {
+
+  // Reset về trang 1 khi filter thay đổi
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, selectedBrand, selectedSort, priceRange]);
+
+  const filteredProducts = products
+    .filter(product => {
     // Lọc theo category
     if (selectedCategory === 'Tất Cả') return true;
 
@@ -104,6 +114,94 @@ const filteredProducts = products
         return 0;
     }
   });
+
+  // Logic phân trang
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProducts = sortedProducts.slice(startIndex, endIndex);
+
+  // Hàm chuyển trang
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Hàm render pagination với ellipsis
+  const renderPagination = () => {
+    const delta = 1;
+    const paginationItems: (number | string)[] = [];
+
+    // Always add the first page
+    paginationItems.push(1);
+
+    // Left ellipsis
+    if (currentPage > delta + 2) {
+      paginationItems.push('...');
+    }
+
+    // Add pages around current page
+    const startPage = Math.max(2, currentPage - delta);
+    const endPage = Math.min(totalPages - 1, currentPage + delta);
+    for (let i = startPage; i <= endPage; i++) {
+      paginationItems.push(i);
+    }
+
+    // Right ellipsis
+    if (currentPage < totalPages - delta - 1) {
+      paginationItems.push('...');
+    }
+
+    // Add the last page if not already included
+    if (totalPages > currentPage + delta) {
+      paginationItems.push(totalPages);
+    }
+
+    return (
+      <nav className="flex items-center space-x-2">
+        <button
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Trước
+        </button>
+        {paginationItems.map((page, index) => {
+          const itemKey = `page-${index}`;
+          if (typeof page === 'string') {
+            return (
+              <span key={itemKey} className="px-3 py-2 text-gray-600 dark:text-gray-400">
+                ...
+              </span>
+            );
+          }
+          return (
+            <button
+              key={itemKey}
+              onClick={() => goToPage(page)}
+              className={`px-3 py-2 rounded-lg border ${
+                currentPage === page
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
+            >
+              {page}
+            </button>
+          );
+        })}
+        <button
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Sau
+        </button>
+      </nav>
+    );
+  };
+
   return <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
@@ -273,9 +371,11 @@ const filteredProducts = products
               </div>
             </div>
             {/* Products */}
-            {sortedProducts.length > 0 ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sortedProducts.map(product => <ProductCard key={product.id} {...product} />)}
-              </div> : <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+            {sortedProducts.length > 0 ?
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {currentProducts.map(product => <ProductCard key={product.id} {...product} />)}
+              </div> : 
+              <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
                 <div className="text-indigo-600 dark:text-indigo-400 mb-4">
                   <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -297,29 +397,7 @@ const filteredProducts = products
               </div>}
             {/* Pagination */}
             {sortedProducts.length > 0 && <div className="flex justify-center mt-12">
-                <nav className="flex items-center space-x-2">
-                  <button className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
-                    Trước
-                  </button>
-                  <button className="px-3 py-2 rounded-lg bg-indigo-600 text-white">
-                    1
-                  </button>
-                  <button className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
-                    2
-                  </button>
-                  <button className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
-                    3
-                  </button>
-                  <span className="px-3 py-2 text-gray-600 dark:text-gray-400">
-                    ...
-                  </span>
-                  <button className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
-                    8
-                  </button>
-                  <button className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
-                    Sau
-                  </button>
-                </nav>
+                {renderPagination()}
               </div>}
           </div>
         </div>
