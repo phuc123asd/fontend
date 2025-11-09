@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
+import { Chatbot } from '../Chatbot';
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -11,5 +12,6 @@ export const Layout = ({
       <Navbar />
       <main className="flex-grow pt-16 md:pt-20">{children}</main>
       <Footer />
+      <Chatbot />
     </div>;
 };

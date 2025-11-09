@@ -5,12 +5,18 @@ interface User {
   email: string;
   role: 'customer' | 'admin';
   avatar?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
 }
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
 }
@@ -31,7 +37,7 @@ export const AuthProvider = ({
       localStorage.removeItem('user');
     }
   }, [user]);
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, _password: string) => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     // Demo: admin@example.com with any password logs in as admin
@@ -53,7 +59,7 @@ export const AuthProvider = ({
       });
     }
   };
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, _password: string) => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     setUser({
@@ -67,6 +73,14 @@ export const AuthProvider = ({
   const logout = () => {
     setUser(null);
   };
+  const updateUser = (updates: Partial<User>) => {
+    if (user) {
+      setUser({
+        ...user,
+        ...updates
+      });
+    }
+  };
   const isAuthenticated = user !== null;
   const isAdmin = user?.role === 'admin';
   return <AuthContext.Provider value={{
@@ -74,6 +88,7 @@ export const AuthProvider = ({
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated,
     isAdmin
   }}>

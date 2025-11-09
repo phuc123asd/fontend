@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useCart } from '../../contexts/CartContext';
@@ -96,6 +96,9 @@ export const Navbar = () => {
                       {user?.email}
                     </p>
                   </div>
+                  <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    My Profile
+                  </Link>
                   <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                     My Orders
                   </Link>
@@ -137,6 +140,9 @@ export const Navbar = () => {
               Contact
             </Link>
             {isAuthenticated && <>
+                <Link to="/profile" className="block py-2 text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400" onClick={() => setIsMobileMenuOpen(false)}>
+                  My Profile
+                </Link>
                 <Link to="/orders" className="block py-2 text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400" onClick={() => setIsMobileMenuOpen(false)}>
                   My Orders
                 </Link>

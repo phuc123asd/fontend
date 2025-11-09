@@ -1,9 +1,9 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CartProvider } from './contexts/CartContext';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { ReviewProvider } from './contexts/ReviewContext';
 import { Layout } from './components/layout/Layout';
 import { Home } from './pages/Home';
 import { Shop } from './pages/Shop';
@@ -16,31 +16,35 @@ import { ProductDetail } from './pages/ProductDetail';
 import { Checkout } from './pages/Checkout';
 import { OrderDetail } from './pages/OrderDetail';
 import { Orders } from './pages/Orders';
+import { Profile } from './pages/Profile';
 export function App() {
   return <ThemeProvider>
       <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <Router>
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/shop" element={<Shop />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/orders/:orderId" element={<OrderDetail />} />
-                  <Route path="*" element={<Home />} />
-                </Routes>
-              </Layout>
-            </Router>
-          </WishlistProvider>
-        </CartProvider>
+        <ReviewProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <Router>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/shop" element={<Shop />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/orders/:orderId" element={<OrderDetail />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="*" element={<Home />} />
+                  </Routes>
+                </Layout>
+              </Router>
+            </WishlistProvider>
+          </CartProvider>
+        </ReviewProvider>
       </AuthProvider>
     </ThemeProvider>;
 }
