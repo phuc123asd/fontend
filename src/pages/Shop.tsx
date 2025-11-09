@@ -3,6 +3,20 @@ import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '../components/product/ProductCard';
 import { SlidersHorizontalIcon, ChevronDownIcon, FilterIcon, XIcon } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+
+// Interfaces cho dữ liệu
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  originalPrice: number;
+  image: string;
+  rating: number;
+  category: string;
+  brand: string;
+  isNew?: boolean;
+}
+
 // Sample product data - same as in FeaturedProducts
 const categoryMapping: Record<string, string> = {
   'Điện Thoại': 'Smartphones',
@@ -15,124 +29,12 @@ const categoryMapping: Record<string, string> = {
   'Flycam': 'Drones'
 };
 
+const defaultProducts: Product[] = [];
 
-const products = [{
-  id: 1,
-  name: 'iPhone 15 Pro',
-  price: 999,
-  originalPrice: 1099,
-  image: 'https://images.unsplash.com/photo-1632661674596-618e45337a12?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1364&q=80',
-  rating: 4.8,
-  category: 'Smartphones',
-  brand: 'Apple',
-  isNew: true
-}, {
-  id: 2,
-  name: 'MacBook Pro M3',
-  price: 1999,
-  originalPrice: 2199,
-  image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1452&q=80',
-  rating: 4.9,
-  category: 'Laptops',
-  brand: 'Apple',
-  isNew: true
-}, {
-  id: 3,
-  name: 'Apple Watch Series 9',
-  price: 399,
-  originalPrice: 429,
-  image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1472&q=80',
-  rating: 4.7,
-  category: 'Smartwatches',
-  brand: 'Apple'
-}, {
-  id: 4,
-  name: 'Sony WH-1000XM5',
-  price: 349,
-  originalPrice: 399,
-  image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1288&q=80',
-  rating: 4.8,
-  category: 'Audio',
-  brand: 'Sony'
-}, {
-  id: 5,
-  name: 'iPad Pro M2',
-  price: 799,
-  originalPrice: 899,
-  image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1035&q=80',
-  rating: 4.9,
-  category: 'Tablets',
-  brand: 'Apple',
-  isNew: true
-}, {
-  id: 6,
-  name: 'Samsung Galaxy S24 Ultra',
-  price: 1199,
-  originalPrice: 1299,
-  image: 'https://images.unsplash.com/photo-1610945264803-c22b62d2a7b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1471&q=80',
-  rating: 4.7,
-  category: 'Smartphones',
-  brand: 'Samsung',
-  isNew: true
-}, {
-  id: 7,
-  name: 'Nintendo Switch OLED',
-  price: 349,
-  originalPrice: 379,
-  image: 'https://images.unsplash.com/photo-1662979291139-44b1370fbfb2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80',
-  rating: 4.8,
-  category: 'Gaming',
-  brand: 'Nintendo'
-}, {
-  id: 8,
-  name: 'DJI Mini 3 Pro',
-  price: 749,
-  originalPrice: 799,
-  image: 'https://images.unsplash.com/photo-1579829366248-204fe8413f31?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80',
-  rating: 4.6,
-  category: 'Drones',
-  brand: 'DJI'
-}, {
-  id: 9,
-  name: 'Dell XPS 15',
-  price: 1499,
-  originalPrice: 1699,
-  image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80',
-  rating: 4.5,
-  category: 'Laptops',
-  brand: 'Dell'
-}, {
-  id: 10,
-  name: 'Samsung Galaxy Watch 6',
-  price: 299,
-  originalPrice: 349,
-  image: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1464&q=80',
-  rating: 4.4,
-  category: 'Smartwatches',
-  brand: 'Samsung'
-}, {
-  id: 11,
-  name: 'Google Pixel 8 Pro',
-  price: 899,
-  originalPrice: 999,
-  image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-  rating: 4.7,
-  category: 'Smartphones',
-  brand: 'Google',
-  isNew: true
-}, {
-  id: 12,
-  name: 'Logitech MX Master 3S',
-  price: 99,
-  originalPrice: 119,
-  image: 'https://images.unsplash.com/photo-1605773527852-c546a8584ea3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80',
-  rating: 4.9,
-  category: 'Accessories',
-  brand: 'Logitech'
-}];
 const categories = ['Tất Cả', 'Điện Thoại', 'Laptop', 'Đồng Hồ Thông Minh', 'Âm Thanh', 'Máy Tính Bảng', 'Game', 'Phụ Kiện', 'Flycam'];
 const brands = ['Tất Cả', 'Apple', 'Samsung', 'Sony', 'Google', 'Dell', 'Nintendo', 'DJI', 'Logitech'];
 const sortOptions = ['Nổi Bật', 'Giá: Thấp đến Cao', 'Giá: Cao đến Thấp', 'Mới Nhất', 'Đánh Giá Cao'];
+
 export const Shop = () => {
   const [searchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState('Tất Cả');
@@ -140,6 +42,28 @@ export const Shop = () => {
   const [selectedSort, setSelectedSort] = useState('Nổi Bật');
   const [priceRange, setPriceRange] = useState([0, 2500]);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  const [products, setProducts] = useState<Product[]>(defaultProducts);
+
+  // Fetch từ API và ép kiểu
+  useEffect(() => {
+  fetch('http://127.0.0.1:8000/api/products')
+    .then(res => res.json())
+    .then(data => {
+      const apiProducts = data.data || data;
+      // Thêm type cho product parameter
+      const formattedProducts = apiProducts.map((product: any) => ({
+        ...product,
+        price: Number(product.price),
+        originalPrice: Number(product.originalPrice),
+        rating: Number(product.rating)
+      }));
+      setProducts(formattedProducts);
+    })
+    .catch(err => {
+      console.error('Lỗi load API, dùng data cứng:', err);
+    });
+  }, []);
 
   useEffect(() => {
     const categoryParam = searchParams.get('category');

@@ -245,52 +245,7 @@ export const ProductDetail = () => {
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               {product.description}
             </p>
-            {/* Color Selector */}
-            {availableColors.length > 0 && (
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Màu sắc: <span className="text-gray-900 dark:text-white font-semibold">{selectedColor}</span>
-                </label>
-                <div className="flex items-center gap-3 flex-wrap">
-                  {availableColors.map((color) => {
-                    const colorMap: { [key: string]: string } = {
-                      'Natural Titanium': 'bg-gradient-to-br from-gray-300 to-gray-400',
-                      'Blue Titanium': 'bg-gradient-to-br from-blue-400 to-blue-600',
-                      'White Titanium': 'bg-gradient-to-br from-gray-100 to-white',
-                      'Black Titanium': 'bg-gradient-to-br from-gray-700 to-black',
-                      'Gold': 'bg-gradient-to-br from-yellow-400 to-yellow-600',
-                      'Silver': 'bg-gradient-to-br from-gray-300 to-gray-400',
-                      'Space Gray': 'bg-gradient-to-br from-gray-600 to-gray-800',
-                      'Rose Gold': 'bg-gradient-to-br from-pink-300 to-pink-400',
-                      'Red': 'bg-gradient-to-br from-red-500 to-red-700',
-                      'Green': 'bg-gradient-to-br from-green-500 to-green-700',
-                      'Purple': 'bg-gradient-to-br from-purple-500 to-purple-700',
-                    };
-                    const colorClass = colorMap[color] || 'bg-gray-400';
-                    const isSelected = selectedColor === color;
-                    
-                    return (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`relative w-12 h-12 rounded-full ${colorClass} border-2 transition-all duration-200 ${
-                          isSelected 
-                            ? 'border-indigo-600 dark:border-indigo-400 scale-110 shadow-lg' 
-                            : 'border-gray-300 dark:border-gray-600 hover:scale-105'
-                        }`}
-                        title={color}
-                      >
-                        {isSelected && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-3 h-3 bg-white rounded-full shadow-md"></div>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            
             {/* Quantity Selector */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
