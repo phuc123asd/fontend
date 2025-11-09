@@ -12,7 +12,7 @@ export const OrderDetail = () => {
   const order = {
     id: orderId,
     date: new Date().toLocaleDateString(),
-    status: 'Processing',
+    status: 'Đang Xử Lý',
     total: 1098.9,
     items: [{
       id: 1,
@@ -22,11 +22,11 @@ export const OrderDetail = () => {
       image: 'https://images.unsplash.com/photo-1632661674596-618e45337a12?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1364&q=80'
     }],
     shipping: {
-      name: 'John Doe',
-      address: '123 Main St',
-      city: 'San Francisco',
-      state: 'CA',
-      zipCode: '94107'
+      name: 'Nguyễn Văn A',
+      address: '123 Đường Chính',
+      city: 'Hồ Chí Minh',
+      state: 'HCM',
+      zipCode: '700000'
     },
     tracking: 'TRK' + Math.random().toString(36).substring(7).toUpperCase()
   };
@@ -38,11 +38,11 @@ export const OrderDetail = () => {
             <CheckCircleIcon className="w-8 h-8 text-green-600 dark:text-green-400 mr-4" />
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Order Confirmed!
+                Đơn Hàng Đã Được Xác Nhận!
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Thank you for your purchase. Your order has been received and is
-                being processed.
+                Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đã được nhận và đang
+                được xử lý.
               </p>
             </div>
           </div>
@@ -53,12 +53,12 @@ export const OrderDetail = () => {
             {/* Order Info */}
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Order Details
+                Chi Tiết Đơn Hàng
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Order Number
+                    Mã Đơn Hàng
                   </p>
                   <p className="font-medium text-gray-900 dark:text-white">
                     #{order.id}
@@ -66,7 +66,7 @@ export const OrderDetail = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Order Date
+                    Ngày Đặt Hàng
                   </p>
                   <p className="font-medium text-gray-900 dark:text-white">
                     {order.date}
@@ -74,7 +74,7 @@ export const OrderDetail = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Status
+                    Trạng Thái
                   </p>
                   <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
                     {order.status}
@@ -82,7 +82,7 @@ export const OrderDetail = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Tracking Number
+                    Mã Vận Đơn
                   </p>
                   <p className="font-medium text-gray-900 dark:text-white">
                     {order.tracking}
@@ -93,7 +93,7 @@ export const OrderDetail = () => {
             {/* Order Items */}
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Items Ordered
+                Sản Phẩm Đã Đặt
               </h3>
               <div className="space-y-4">
                 {order.items.map(item => <div key={item.id} className="flex gap-4">
@@ -103,7 +103,7 @@ export const OrderDetail = () => {
                         {item.name}
                       </h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Quantity: {item.quantity}
+                        Số lượng: {item.quantity}
                       </p>
                       <p className="font-medium text-gray-900 dark:text-white">
                         ${item.price.toFixed(2)}
@@ -116,7 +116,7 @@ export const OrderDetail = () => {
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
                 <MapPinIcon className="w-5 h-5 mr-2" />
-                Shipping Address
+                Địa Chỉ Giao Hàng
               </h3>
               <div className="text-gray-600 dark:text-gray-400">
                 <p>{order.shipping.name}</p>
@@ -132,33 +132,33 @@ export const OrderDetail = () => {
           <div className="lg:col-span-1">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 sticky top-24">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                Order Summary
+                Tóm Tắt Đơn Hàng
               </h3>
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Subtotal</span>
+                  <span>Tạm tính</span>
                   <span>${(order.total / 1.1).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Shipping</span>
-                  <span>Free</span>
+                  <span>Phí vận chuyển</span>
+                  <span>Miễn phí</span>
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Tax</span>
+                  <span>Thuế</span>
                   <span>${(order.total / 1.1 * 0.1).toFixed(2)}</span>
                 </div>
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <div className="flex justify-between text-xl font-bold text-gray-900 dark:text-white">
-                    <span>Total</span>
+                    <span>Tổng cộng</span>
                     <span>${order.total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
               <Button as={Link} to="/shop" className="w-full mb-4">
-                Continue Shopping
+                Tiếp Tục Mua Sắm
               </Button>
               <Button as={Link} to="/orders" variant="outline" className="w-full">
-                View All Orders
+                Xem Tất Cả Đơn Hàng
               </Button>
             </div>
           </div>

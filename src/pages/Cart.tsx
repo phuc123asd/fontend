@@ -16,13 +16,13 @@ export const Cart = () => {
           <div className="text-center py-16">
             <ShoppingBagIcon className="mx-auto h-24 w-24 text-gray-400 dark:text-gray-600 mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Your cart is empty
+              Giỏ hàng của bạn đang trống
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-8">
-              Add some products to get started!
+              Thêm sản phẩm để bắt đầu!
             </p>
             <Button as={Link} to="/shop">
-              Continue Shopping
+              Tiếp tục mua sắm
             </Button>
           </div>
         </div>
@@ -31,7 +31,7 @@ export const Cart = () => {
   return <div className="min-h-screen bg-white dark:bg-gray-900 py-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-          Shopping Cart
+          Giỏ hàng
         </h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -44,7 +44,7 @@ export const Cart = () => {
                       {item.name}
                     </h3>
                     {item.variant && <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        Variant: {item.variant}
+                        Phiên bản: {item.variant}
                       </p>}
                     <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
                       ${item.price.toFixed(2)}
@@ -73,33 +73,33 @@ export const Cart = () => {
           <div className="lg:col-span-1">
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 sticky top-24">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                Order Summary
+                Tóm tắt đơn hàng
               </h2>
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Subtotal</span>
+                  <span>Tạm tính</span>
                   <span>${cartTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Shipping</span>
-                  <span>Free</span>
+                  <span>Phí vận chuyển</span>
+                  <span>Miễn phí</span>
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Tax</span>
+                  <span>Thuế</span>
                   <span>${(cartTotal * 0.1).toFixed(2)}</span>
                 </div>
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <div className="flex justify-between text-xl font-bold text-gray-900 dark:text-white">
-                    <span>Total</span>
+                    <span>Tổng cộng</span>
                     <span>${(cartTotal * 1.1).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
               <Button as={Link} to="/checkout" className="w-full mb-4">
-                Proceed to Checkout
+                Tiến hành thanh toán
               </Button>
               <Button as={Link} to="/shop" variant="outline" className="w-full">
-                Continue Shopping
+                Tiếp tục mua sắm
               </Button>
             </div>
           </div>

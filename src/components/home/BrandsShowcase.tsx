@@ -29,7 +29,7 @@ export const BrandsShowcase = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Trusted Brands
+            Thương Hiệu Uy Tín
           </h2>
         </div>
         <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">

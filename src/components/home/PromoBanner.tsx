@@ -11,40 +11,40 @@ export const PromoBanner = () => {
           <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between p-8 md:p-12 lg:p-16">
             <div className="mb-8 lg:mb-0 text-center lg:text-left">
               <span className="inline-block px-3 py-1 bg-indigo-600 text-white text-sm font-medium rounded-full mb-4">
-                Limited Time Offer
+                Ưu Đãi Có Thời Hạn
               </span>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-                Black Friday <span className="text-indigo-400">Sale</span>
+                Khuyến Mãi <span className="text-indigo-400">Black Friday</span>
               </h2>
               <p className="text-lg md:text-xl text-gray-300 mb-6 max-w-xl">
-                Get up to 50% off on our premium tech products. Offer valid
-                until November 30th.
+                Giảm giá lên đến 50% cho các sản phẩm công nghệ cao cấp. Ưu đãi có hiệu lực
+                đến ngày 30 tháng 11.
               </p>
               <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
                 <Button as={Link} to="/shop/deals" size="lg" className="bg-indigo-600 hover:bg-indigo-700">
-                  Shop Deals
+                  Mua Ngay
                 </Button>
                 <Button as={Link} to="/shop" variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
-                  Browse All
+                  Xem Tất Cả
                 </Button>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
                 <span className="block text-4xl font-bold mb-1">15</span>
-                <span className="block text-sm text-gray-300">Days</span>
+                <span className="block text-sm text-gray-300">Ngày</span>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
                 <span className="block text-4xl font-bold mb-1">08</span>
-                <span className="block text-sm text-gray-300">Hours</span>
+                <span className="block text-sm text-gray-300">Giờ</span>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
                 <span className="block text-4xl font-bold mb-1">23</span>
-                <span className="block text-sm text-gray-300">Minutes</span>
+                <span className="block text-sm text-gray-300">Phút</span>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
                 <span className="block text-4xl font-bold mb-1">42</span>
-                <span className="block text-sm text-gray-300">Seconds</span>
+                <span className="block text-sm text-gray-300">Giây</span>
               </div>
             </div>
           </div>

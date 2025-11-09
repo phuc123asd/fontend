@@ -18,11 +18,11 @@ export const Register = () => {
     e.preventDefault();
     setError('');
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('Mật khẩu không khớp');
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Mật khẩu phải có ít nhất 6 ký tự');
       return;
     }
     setIsLoading(true);
@@ -30,7 +30,7 @@ export const Register = () => {
       await register(name, email, password);
       navigate('/');
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError('Đăng ký thất bại. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
@@ -44,27 +44,27 @@ export const Register = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            Create your account
+            Tạo tài khoản mới
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Or{' '}
+            Hoặc{' '}
             <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-              sign in to existing account
+              đăng nhập vào tài khoản có sẵn
             </Link>
           </p>
         </div>
         <div className="space-y-3">
           <button onClick={() => handleSocialLogin('google')} className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 mr-2" />
-            Continue with Google
+            Tiếp tục với Google
           </button>
           <button onClick={() => handleSocialLogin('facebook')} className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <img src="https://www.facebook.com/favicon.ico" alt="Facebook" className="w-5 h-5 mr-2" />
-            Continue with Facebook
+            Tiếp tục với Facebook
           </button>
           <button onClick={() => handleSocialLogin('apple')} className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <img src="https://www.apple.com/favicon.ico" alt="Apple" className="w-5 h-5 mr-2" />
-            Continue with Apple
+            Tiếp tục với Apple
           </button>
         </div>
         <div className="relative">
@@ -73,7 +73,7 @@ export const Register = () => {
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="px-2 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
-              Or continue with email
+              Hoặc tiếp tục với email
             </span>
           </div>
         </div>
@@ -91,29 +91,29 @@ export const Register = () => {
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Full Name
+                Họ và tên
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <UserIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <input id="name" name="name" type="text" required value={name} onChange={e => setName(e.target.value)} className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="John Doe" />
+                <input id="name" name="name" type="text" required value={name} onChange={e => setName(e.target.value)} className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="Nguyễn Văn A" />
               </div>
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email address
+                Địa chỉ email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <MailIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <input id="email" name="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="you@example.com" />
+                <input id="email" name="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="email@example.com" />
               </div>
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Password
+                Mật khẩu
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -124,7 +124,7 @@ export const Register = () => {
             </div>
             <div>
               <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Confirm Password
+                Xác nhận mật khẩu
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -136,7 +136,7 @@ export const Register = () => {
           </div>
           <div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
             </Button>
           </div>
         </form>

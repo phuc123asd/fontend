@@ -1,4 +1,3 @@
-import React from 'react';
 import { ProductCard } from '../product/ProductCard';
 import { Button } from '../ui/Button';
 import { ArrowRightIcon } from 'lucide-react';
@@ -87,14 +86,14 @@ export const FeaturedProducts = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Featured Products
+              Sản Phẩm Nổi Bật
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
-              Explore our handpicked selection of premium tech products
+              Khám phá bộ sưu tập sản phẩm công nghệ cao cấp được tuyển chọn
             </p>
           </div>
           <Button as={Link} to="/shop" variant="outline" className="mt-6 md:mt-0" rightIcon={<ArrowRightIcon className="w-4 h-4" />}>
-            View All Products
+            Xem Tất Cả
           </Button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -44,21 +44,21 @@ export const Profile = () => {
     const newErrors: { [key: string]: string } = {};
     
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = 'Tên là bắt buộc';
     }
     
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email là bắt buộc';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = 'Email không hợp lệ';
     }
     
     if (formData.phone && !/^[\d\s\-\+\(\)]+$/.test(formData.phone)) {
-      newErrors.phone = 'Phone number is invalid';
+      newErrors.phone = 'Số điện thoại không hợp lệ';
     }
     
     if (formData.zipCode && !/^\d{5}(-\d{4})?$/.test(formData.zipCode)) {
-      newErrors.zipCode = 'ZIP code must be 5 digits (e.g., 94107)';
+      newErrors.zipCode = 'Mã bưu điện phải là 5-6 chữ số (ví dụ: 700000)';
     }
     
     setErrors(newErrors);
@@ -109,12 +109,12 @@ export const Profile = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            My Profile
+            Hồ Sơ Của Tôi
           </h1>
           {showSuccess && (
             <div className="flex items-center gap-2 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-4 py-2 rounded-lg animate-fade-in">
               <CheckCircleIcon className="w-5 h-5" />
-              <span>Profile updated successfully!</span>
+              <span>Cập nhật hồ sơ thành công!</span>
             </div>
           )}
         </div>
@@ -137,7 +137,7 @@ export const Profile = () => {
                 {user?.role === 'admin' && (
                   <span className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm mt-2">
                     <ShieldCheckIcon className="w-4 h-4" />
-                    Administrator
+                    Quản Trị Viên
                   </span>
                 )}
               </div>
@@ -147,11 +147,11 @@ export const Profile = () => {
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Personal Information
+                Thông Tin Cá Nhân
               </h3>
               {!isEditing && (
                 <Button onClick={() => setIsEditing(true)} variant="outline">
-                  Edit Profile
+                  Chỉnh Sửa Hồ Sơ
                 </Button>
               )}
             </div>
@@ -160,7 +160,7 @@ export const Profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Full Name
+                    Họ và Tên
                   </label>
                   <div className="relative">
                     <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -180,7 +180,7 @@ export const Profile = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email Address
+                    Địa Chỉ Email
                   </label>
                   <div className="relative">
                     <MailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -200,14 +200,14 @@ export const Profile = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Phone Number
+                    Số Điện Thoại
                   </label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     disabled={!isEditing}
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="0912 345 678"
                     className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 ${
                       errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                     }`}
@@ -217,28 +217,28 @@ export const Profile = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Address
+                    Địa Chỉ
                   </label>
                   <input
                     type="text"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     disabled={!isEditing}
-                    placeholder="123 Main St"
+                    placeholder="123 Đường Chính"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    City
+                    Thành Phố
                   </label>
                   <input
                     type="text"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     disabled={!isEditing}
-                    placeholder="San Francisco"
+                    placeholder="Hồ Chí Minh"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
                   />
                 </div>
@@ -246,28 +246,28 @@ export const Profile = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      State
+                      Tỉnh/Thành
                     </label>
                     <input
                       type="text"
                       value={formData.state}
                       onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                       disabled={!isEditing}
-                      placeholder="CA"
+                      placeholder="HCM"
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      ZIP Code
+                      Mã Bưu Điện
                     </label>
                     <input
                       type="text"
                       value={formData.zipCode}
                       onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
                       disabled={!isEditing}
-                      placeholder="94107"
+                      placeholder="700000"
                       className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 ${
                         errors.zipCode ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                       }`}
@@ -280,7 +280,7 @@ export const Profile = () => {
               {isEditing && (
                 <div className="mt-6 flex gap-4">
                   <Button type="submit" disabled={isSaving} isLoading={isSaving} leftIcon={<SaveIcon className="w-5 h-5" />}>
-                    {isSaving ? 'Saving...' : 'Save Changes'}
+                    {isSaving ? 'Đang lưu...' : 'Lưu Thay Đổi'}
                   </Button>
                   <Button
                     type="button"
@@ -288,7 +288,7 @@ export const Profile = () => {
                     onClick={handleCancel}
                     disabled={isSaving}
                   >
-                    Cancel
+                    Hủy
                   </Button>
                 </div>
               )}
@@ -297,14 +297,14 @@ export const Profile = () => {
 
           <div className="p-6 border-t border-gray-200 dark:border-gray-700">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Account Actions
+              Quản Lý Tài Khoản
             </h3>
             <div className="flex gap-4">
               <Button variant="outline" onClick={handleLogout}>
-                Logout
+                Đăng Xuất
               </Button>
               <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-                Delete Account
+                Xóa Tài Khoản
               </Button>
             </div>
           </div>

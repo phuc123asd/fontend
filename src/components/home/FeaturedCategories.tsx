@@ -30,11 +30,11 @@ export const FeaturedCategories = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Shop by Category
+            Mua Sắm Theo Danh Mục
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Browse our wide selection of premium tech products across popular
-            categories
+            Khám phá bộ sưu tập đa dạng các sản phẩm công nghệ cao cấp
+            theo các danh mục phổ biến
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -49,7 +49,7 @@ export const FeaturedCategories = () => {
                   <h3 className="text-xl font-bold text-white mb-1">
                     {category.name}
                   </h3>
-                  <p className="text-gray-200 text-sm">Shop Now</p>
+                  <p className="text-gray-200 text-sm">Mua Ngay</p>
                 </div>
               </div>
             </Link>)}

@@ -58,59 +58,59 @@ export const ProductCard = ({
       });
     }
   };
-  return <div className="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+  return <div className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 transform hover:-translate-y-1">
       {/* Badges */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-        {isNew && <span className="px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded">
-            New
+        {isNew && <span className="px-2.5 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-semibold rounded-full shadow-md">
+            Mới
           </span>}
-        {discount > 0 && <span className="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded">
+        {discount > 0 && <span className="px-2.5 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-full shadow-md">
             -{discount}%
           </span>}
-        {isFeatured && <span className="px-2 py-1 bg-amber-500 text-white text-xs font-medium rounded">
-            Featured
+        {isFeatured && <span className="px-2.5 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold rounded-full shadow-md">
+            Nổi bật
           </span>}
       </div>
       {/* Wishlist button */}
-      <button onClick={handleWishlistToggle} className="absolute top-3 right-3 z-10 p-1.5 bg-white/80 dark:bg-gray-800/80 rounded-full text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-500 backdrop-blur-sm" aria-label="Add to wishlist">
+      <button onClick={handleWishlistToggle} className="absolute top-3 right-3 z-10 p-2 bg-white/95 dark:bg-gray-800/95 rounded-full text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-500 hover:bg-white dark:hover:bg-gray-800 backdrop-blur-sm shadow-md transition-all duration-200 hover:scale-110" aria-label="Add to wishlist">
         <HeartIcon className={`w-5 h-5 ${inWishlist ? 'fill-red-500 text-red-500' : ''}`} />
       </button>
       {/* Image */}
-      <Link to={`/product/${id}`} className="block relative aspect-square overflow-hidden">
-        <img src={image} alt={name} className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" />
+      <Link to={`/product/${id}`} className="block relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700">
+        <img src={image} alt={name} className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" />
       </Link>
       {/* Content */}
-      <div className="p-4">
+      <div className="p-5">
         <Link to={`/product/${id}`} className="block">
-          <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold uppercase tracking-wider">
             {category}
           </span>
-          <h3 className="mt-1 text-lg font-medium text-gray-900 dark:text-white truncate">
+          <h3 className="mt-1.5 text-lg font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
             {name}
           </h3>
           {/* Rating */}
-          <div className="flex items-center mt-1">
+          <div className="flex items-center mt-2">
             <div className="flex">
               {[...Array(5)].map((_, i) => <StarIcon key={i} className={`w-4 h-4 ${i < rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`} />)}
             </div>
-            <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">
-              ({rating.toFixed(1)})
+            <span className="ml-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+              {rating.toFixed(1)}
             </span>
           </div>
           {/* Price */}
-          <div className="mt-2 flex items-center">
-            <span className="text-lg font-bold text-gray-900 dark:text-white">
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-bold text-gray-900 dark:text-white">
               ${price.toFixed(2)}
             </span>
-            {originalPrice && <span className="ml-2 text-sm text-gray-500 dark:text-gray-400 line-through">
+            {originalPrice && <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
                 ${originalPrice.toFixed(2)}
               </span>}
           </div>
         </Link>
         {/* Add to cart button */}
-        <button onClick={handleAddToCart} className="mt-3 w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg flex items-center justify-center transition-colors" aria-label="Add to cart">
-          <ShoppingCartIcon className="w-4 h-4 mr-2" />
-          Add to Cart
+        <button onClick={handleAddToCart} className="mt-4 w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg" aria-label="Add to cart">
+          <ShoppingCartIcon className="w-4 h-4" />
+          Thêm vào giỏ
         </button>
       </div>
     </div>;

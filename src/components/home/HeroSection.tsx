@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { ArrowRightIcon, SparklesIcon } from 'lucide-react';
@@ -14,38 +13,38 @@ export const HeroSection = () => {
           <div className="text-white">
             <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
               <SparklesIcon className="w-4 h-4 mr-2" />
-              New Arrivals Available
+              Hàng Mới Về
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Next-Gen Tech <br />
+              Công Nghệ Thế Hệ Mới <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">
-                For Modern Life
+                Cho Cuộc Sống Hiện Đại
               </span>
             </h1>
             <p className="text-lg md:text-xl mb-8 text-gray-100 max-w-lg">
-              Discover the latest smartphones, laptops, and accessories with
-              cutting-edge technology and premium design.
+              Khám phá điện thoại, laptop và phụ kiện mới nhất với
+              công nghệ tiên tiến và thiết kế cao cấp.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button as={Link} to="/shop" size="lg" rightIcon={<ArrowRightIcon className="w-5 h-5" />} className="bg-white text-indigo-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
-                Shop Now
+                Mua Ngay
               </Button>
               <Button as={Link} to="/shop?filter=new" variant="outline" size="lg" className="border-2 border-white text-white hover:bg-white/10 backdrop-blur-sm">
-                New Releases
+                Sản Phẩm Mới
               </Button>
             </div>
             <div className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-white/20">
               <div>
                 <div className="text-3xl font-bold">50K+</div>
-                <div className="text-sm text-gray-200">Happy Customers</div>
+                <div className="text-sm text-gray-200">Khách Hàng</div>
               </div>
               <div>
                 <div className="text-3xl font-bold">100K+</div>
-                <div className="text-sm text-gray-200">Products Sold</div>
+                <div className="text-sm text-gray-200">Sản Phẩm Đã Bán</div>
               </div>
               <div>
                 <div className="text-3xl font-bold">4.9★</div>
-                <div className="text-sm text-gray-200">Customer Rating</div>
+                <div className="text-sm text-gray-200">Đánh Giá</div>
               </div>
             </div>
           </div>

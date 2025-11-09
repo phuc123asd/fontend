@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -57,7 +57,7 @@ export const Checkout = () => {
   return <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-          Checkout
+          Thanh Toán
         </h1>
         {/* Progress Steps */}
         <div className="mb-8">
@@ -74,10 +74,10 @@ export const Checkout = () => {
           </div>
           <div className="flex justify-center mt-2 gap-24">
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              Shipping
+              Giao Hàng
             </span>
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              Payment
+              Thanh Toán
             </span>
           </div>
         </div>
@@ -86,13 +86,13 @@ export const Checkout = () => {
           <div className="lg:col-span-2">
             {step === 1 ? <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                  Shipping Information
+                  Thông Tin Giao Hàng
                 </h2>
                 <form onSubmit={handleShippingSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Full Name
+                        Họ và Tên
                       </label>
                       <input type="text" required value={shippingInfo.fullName} onChange={e => setShippingInfo({
                     ...shippingInfo,
@@ -110,7 +110,7 @@ export const Checkout = () => {
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Address
+                        Địa Chỉ
                       </label>
                       <input type="text" required value={shippingInfo.address} onChange={e => setShippingInfo({
                     ...shippingInfo,
@@ -119,7 +119,7 @@ export const Checkout = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        City
+                        Thành Phố
                       </label>
                       <input type="text" required value={shippingInfo.city} onChange={e => setShippingInfo({
                     ...shippingInfo,
@@ -128,7 +128,7 @@ export const Checkout = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        State
+                        Tỉnh/Thành
                       </label>
                       <input type="text" required value={shippingInfo.state} onChange={e => setShippingInfo({
                     ...shippingInfo,
@@ -137,7 +137,7 @@ export const Checkout = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        ZIP Code
+                        Mã Bưu Điện
                       </label>
                       <input type="text" required value={shippingInfo.zipCode} onChange={e => setShippingInfo({
                     ...shippingInfo,
@@ -146,7 +146,7 @@ export const Checkout = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Phone
+                        Số Điện Thoại
                       </label>
                       <input type="tel" required value={shippingInfo.phone} onChange={e => setShippingInfo({
                     ...shippingInfo,
@@ -155,19 +155,19 @@ export const Checkout = () => {
                     </div>
                   </div>
                   <Button type="submit" className="w-full mt-6">
-                    Continue to Payment
+                    Tiếp Tục Thanh Toán
                   </Button>
                 </form>
               </div> : <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                   <LockIcon className="w-5 h-5 mr-2 text-green-600" />
-                  Payment Information
+                  Thông Tin Thanh Toán
                 </h2>
                 <form onSubmit={handlePaymentSubmit}>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Card Number
+                        Số Thẻ
                       </label>
                       <div className="relative">
                         <input type="text" required placeholder="1234 5678 9012 3456" value={paymentInfo.cardNumber} onChange={e => setPaymentInfo({
@@ -179,7 +179,7 @@ export const Checkout = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Cardholder Name
+                        Tên Chủ Thẻ
                       </label>
                       <input type="text" required value={paymentInfo.cardName} onChange={e => setPaymentInfo({
                     ...paymentInfo,
@@ -189,7 +189,7 @@ export const Checkout = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Expiry Date
+                          Ngày Hết Hạn
                         </label>
                         <input type="text" required placeholder="MM/YY" value={paymentInfo.expiryDate} onChange={e => setPaymentInfo({
                       ...paymentInfo,
@@ -212,16 +212,16 @@ export const Checkout = () => {
                     saveCard: e.target.checked
                   })} className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
                       <label htmlFor="saveCard" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                        Save card for future purchases
+                        Lưu thẻ cho lần mua sau
                       </label>
                     </div>
                   </div>
                   <div className="flex gap-4 mt-6">
                     <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1">
-                      Back
+                      Quay Lại
                     </Button>
                     <Button type="submit" disabled={isProcessing} className="flex-1">
-                      {isProcessing ? 'Processing...' : 'Place Order'}
+                      {isProcessing ? 'Đang Xử Lý...' : 'Đặt Hàng'}
                     </Button>
                   </div>
                 </form>
@@ -231,7 +231,7 @@ export const Checkout = () => {
           <div className="lg:col-span-1">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 sticky top-24">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                Order Summary
+                Tóm Tắt Đơn Hàng
               </h2>
               <div className="space-y-4 mb-6">
                 {cartItems.map(item => <div key={item.id} className="flex gap-4">
@@ -241,7 +241,7 @@ export const Checkout = () => {
                         {item.name}
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Qty: {item.quantity}
+                        SL: {item.quantity}
                       </p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         ${(item.price * item.quantity).toFixed(2)}
@@ -251,20 +251,20 @@ export const Checkout = () => {
               </div>
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Subtotal</span>
+                  <span>Tạm Tính</span>
                   <span>${cartTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Shipping</span>
-                  <span>Free</span>
+                  <span>Phí Vận Chuyển</span>
+                  <span>Miễn Phí</span>
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Tax</span>
+                  <span>Thuế</span>
                   <span>${tax.toFixed(2)}</span>
                 </div>
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
                   <div className="flex justify-between text-xl font-bold text-gray-900 dark:text-white">
-                    <span>Total</span>
+                    <span>Tổng Cộng</span>
                     <span>${total.toFixed(2)}</span>
                   </div>
                 </div>

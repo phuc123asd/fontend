@@ -3,37 +3,37 @@ import { ChevronLeftIcon, ChevronRightIcon, StarIcon } from 'lucide-react';
 const testimonials = [{
   id: 1,
   name: 'Sarah Johnson',
-  role: 'Tech Enthusiast',
+  role: 'Người Đam Mê Công Nghệ',
   image: 'https://randomuser.me/api/portraits/women/12.jpg',
-  content: "The product quality is exceptional! I've been using my new MacBook Pro for video editing and the performance is incredible. The customer service was also top-notch.",
+  content: "Chất lượng sản phẩm thật tuyệt vời! Tôi đã sử dụng MacBook Pro mới để chỉnh sửa video và hiệu suất thật đáng kinh ngạc. Dịch vụ khách hàng cũng rất xuất sắc.",
   rating: 5
 }, {
   id: 2,
   name: 'Michael Chen',
-  role: 'Software Developer',
+  role: 'Lập Trình Viên',
   image: 'https://randomuser.me/api/portraits/men/32.jpg',
-  content: "Fast shipping and the product was exactly as described. I'm extremely satisfied with my purchase and will definitely be shopping here again!",
+  content: "Giao hàng nhanh và sản phẩm đúng như mô tả. Tôi cực kỳ hài lòng với đơn hàng và chắc chắn sẽ mua sắm ở đây lần nữa!",
   rating: 5
 }, {
   id: 3,
   name: 'Emily Rodriguez',
-  role: 'Digital Creator',
+  role: 'Nhà Sáng Tạo Nội Dung',
   image: 'https://randomuser.me/api/portraits/women/23.jpg',
-  content: 'The smartphone I purchased has exceeded my expectations. The camera quality is amazing and battery life is impressive. Highly recommend!',
+  content: 'Chiếc điện thoại tôi mua đã vượt quá mong đợi. Chất lượng camera tuyệt vời và thời lượng pin ấn tượng. Rất đáng mua!',
   rating: 4
 }, {
   id: 4,
   name: 'David Kim',
-  role: 'Gamer',
+  role: 'Game Thủ',
   image: 'https://randomuser.me/api/portraits/men/46.jpg',
-  content: 'The gaming accessories I bought have completely transformed my setup. Great quality and the prices were better than other retailers.',
+  content: 'Những phụ kiện gaming tôi mua đã thay đổi hoàn toàn setup của tôi. Chất lượng tốt và giá cả cạnh tranh hơn các cửa hàng khác.',
   rating: 5
 }, {
   id: 5,
   name: 'Jessica Patel',
-  role: 'Student',
+  role: 'Sinh Viên',
   image: 'https://randomuser.me/api/portraits/women/37.jpg',
-  content: 'As a student, finding affordable yet quality tech is important. This store has the best selection and student discounts. My laptop is perfect for my needs!',
+  content: 'Là sinh viên, việc tìm công nghệ chất lượng với giá hợp lý rất quan trọng. Cửa hàng này có lựa chọn tốt nhất và giảm giá cho sinh viên. Laptop của tôi hoàn hảo cho nhu cầu học tập!',
   rating: 4
 }];
 export const Testimonials = () => {
@@ -48,10 +48,10 @@ export const Testimonials = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            What Our Customers Say
+            Khách Hàng Nói Gì Về Chúng Tôi
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Don't just take our word for it — hear from our satisfied customers
+            Đừng chỉ nghe chúng tôi nói — hãy lắng nghe từ những khách hàng hài lòng
           </p>
         </div>
         <div className="relative max-w-4xl mx-auto">

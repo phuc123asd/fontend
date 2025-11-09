@@ -19,15 +19,15 @@ const productData = {
     reviewCount: 256,
     category: 'Smartphones',
     brand: 'Apple',
-    description: 'The iPhone 15 Pro features a stunning titanium design, A17 Pro chip, and advanced camera system. Experience the power of professional photography in your pocket.',
-    features: ['A17 Pro chip for lightning-fast performance', 'Pro camera system with 48MP main camera', 'Titanium design with Ceramic Shield', 'Action button for quick shortcuts', 'USB-C connectivity', 'All-day battery life'],
+    description: 'iPhone 15 Pro mang đến thiết kế titanium tuyệt đẹp, chip A17 Pro và hệ thống camera tiên tiến. Trải nghiệm sức mạnh nhiếp ảnh chuyên nghiệp trong túi của bạn.',
+    features: ['Chip A17 Pro cho hiệu suất cực nhanh', 'Hệ thống camera Pro với camera chính 48MP', 'Thiết kế titanium với Ceramic Shield', 'Nút hành động cho phím tắt nhanh', 'Kết nối USB-C', 'Pin dùng cả ngày'],
     specifications: {
-      Display: '6.1-inch Super Retina XDR display',
-      Chip: 'A17 Pro chip',
-      Camera: '48MP Main | 12MP Ultra Wide | 12MP Telephoto',
-      Battery: 'Up to 23 hours video playback',
+      Display: 'Màn hình Super Retina XDR 6.1 inch',
+      Chip: 'Chip A17 Pro',
+      Camera: '48MP Chính | 12MP Siêu rộng | 12MP Telephoto',
+      Battery: 'Phát lại video lên đến 23 giờ',
       Storage: '128GB, 256GB, 512GB, 1TB',
-      Colors: 'Natural Titanium, Blue Titanium, White Titanium, Black Titanium'
+      Colors: 'Titanium Tự Nhiên, Titanium Xanh, Titanium Trắng, Titanium Đen'
     },
     inStock: true,
     hasARView: true
@@ -101,7 +101,7 @@ export const ProductDetail = () => {
     if (!isAuthenticated || !user) return;
     
     if (newReviewComment.trim().length < 10) {
-      alert('Please write a review with at least 10 characters.');
+      alert('Vui lòng viết đánh giá ít nhất 10 ký tự.');
       return;
     }
     
@@ -132,7 +132,7 @@ export const ProductDetail = () => {
 
   const handleUpdateReview = (reviewId: number) => {
     if (editComment.trim().length < 10) {
-      alert('Please write a review with at least 10 characters.');
+      alert('Vui lòng viết đánh giá ít nhất 10 ký tự.');
       return;
     }
     updateReview(reviewId, editComment.trim(), editRating);
@@ -181,7 +181,7 @@ export const ProductDetail = () => {
   const reviewStats = calculateReviewStats();
 
   const handleDeleteReview = (reviewId: number) => {
-    if (window.confirm('Are you sure you want to delete this review?')) {
+    if (window.confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
       deleteReview(reviewId);
     }
   };
@@ -190,11 +190,11 @@ export const ProductDetail = () => {
         {/* Breadcrumb */}
         <nav className="flex mb-8 text-sm">
           <Link to="/" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
-            Home
+            Trang Chủ
           </Link>
           <span className="mx-2 text-gray-500">/</span>
           <Link to="/shop" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
-            Shop
+            Cửa Hàng
           </Link>
           <span className="mx-2 text-gray-500">/</span>
           <span className="text-gray-900 dark:text-white">{product.name}</span>
@@ -225,7 +225,7 @@ export const ProductDetail = () => {
                   {[...Array(5)].map((_, i) => <StarIcon key={i} className={`w-5 h-5 ${i < Math.floor(product.rating) ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`} />)}
                 </div>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {product.rating} ({product.reviewCount} reviews)
+                  {product.rating} ({product.reviewCount} đánh giá)
                 </span>
               </div>
             </div>
@@ -239,7 +239,7 @@ export const ProductDetail = () => {
                   </span>}
               </div>
               <p className="text-green-600 dark:text-green-400 mt-2">
-                {product.inStock ? 'In Stock' : 'Out of Stock'}
+                {product.inStock ? 'Còn hàng' : 'Hết hàng'}
               </p>
             </div>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
@@ -249,7 +249,7 @@ export const ProductDetail = () => {
             {availableColors.length > 0 && (
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Color: <span className="text-gray-900 dark:text-white font-semibold">{selectedColor}</span>
+                  Màu sắc: <span className="text-gray-900 dark:text-white font-semibold">{selectedColor}</span>
                 </label>
                 <div className="flex items-center gap-3 flex-wrap">
                   {availableColors.map((color) => {
@@ -294,7 +294,7 @@ export const ProductDetail = () => {
             {/* Quantity Selector */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Quantity
+                Số lượng
               </label>
               <div className="flex items-center gap-4">
                 <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg">
@@ -313,7 +313,7 @@ export const ProductDetail = () => {
             {/* Action Buttons */}
             <div className="flex gap-4 mb-8">
               <Button onClick={handleAddToCart} className="flex-grow" leftIcon={<ShoppingCartIcon className="w-5 h-5" />}>
-                Add to Cart
+                Thêm vào giỏ
               </Button>
               <Button onClick={handleWishlistToggle} variant="outline" className={inWishlist ? 'text-red-600 border-red-600' : ''}>
                 <HeartIcon className={`w-5 h-5 ${inWishlist ? 'fill-red-600' : ''}`} />
@@ -321,7 +321,7 @@ export const ProductDetail = () => {
             </div>
             {/* AR View Button */}
             {product.hasARView && <Link to={`/products/${product.id}/ar-view`} className="w-full mb-8 inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                View in AR
+                Xem AR
               </Link>}
             {/* Features */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
@@ -329,19 +329,19 @@ export const ProductDetail = () => {
                 <div className="flex items-center gap-2">
                   <TruckIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Free Shipping
+                    Miễn phí vận chuyển
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheckIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    1 Year Warranty
+                    Bảo hành 1 năm
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <RotateCcwIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    30-Day Returns
+                    Đổi trả trong 30 ngày
                   </span>
                 </div>
               </div>
@@ -352,11 +352,11 @@ export const ProductDetail = () => {
         <div className="border-t border-gray-200 dark:border-gray-700 pt-12">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              Product Details
+              Chi Tiết Sản Phẩm
             </h2>
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-                Key Features
+                Tính Năng Chính
               </h3>
               <ul className="space-y-2">
                 {product.features.map((feature, index) => <li key={index} className="flex items-start">
@@ -372,7 +372,7 @@ export const ProductDetail = () => {
           </div>
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              Specifications
+              Thông Số Kỹ Thuật
             </h2>
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -390,7 +390,7 @@ export const ProductDetail = () => {
           {/* Reviews Section */}
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-              Customer Reviews
+              Đánh Giá Khách Hàng
             </h2>
 
             {/* Review Statistics */}
@@ -415,7 +415,7 @@ export const ProductDetail = () => {
                         ))}
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {reviewStats.totalReviews} {reviewStats.totalReviews === 1 ? 'review' : 'reviews'}
+                        {reviewStats.totalReviews} {reviewStats.totalReviews === 1 ? 'đánh giá' : 'đánh giá'}
                       </p>
                     </div>
                     <div className="flex-grow">
@@ -446,21 +446,21 @@ export const ProductDetail = () => {
                   <div className="flex items-center justify-center md:justify-end">
                     <div className="text-center md:text-right">
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        Want to share your experience?
+                        Muốn chia sẻ trải nghiệm của bạn?
                       </p>
                       {isAuthenticated ? (
                         <button
                           onClick={() => document.getElementById('review-form')?.scrollIntoView({ behavior: 'smooth' })}
                           className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold"
                         >
-                          Write a Review →
+                          Viết Đánh Giá →
                         </button>
                       ) : (
                         <Link
                           to="/login"
                           className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold"
                         >
-                          Log in to Review →
+                          Đăng Nhập để Đánh Giá →
                         </Link>
                       )}
                     </div>
@@ -473,20 +473,20 @@ export const ProductDetail = () => {
             {productReviews.length > 0 && (
               <div className="flex items-center justify-between mb-6">
                 <p className="text-gray-600 dark:text-gray-400">
-                  Showing {sortedReviews.length} {sortedReviews.length === 1 ? 'review' : 'reviews'}
+                  Hiển thị {sortedReviews.length} {sortedReviews.length === 1 ? 'đánh giá' : 'đánh giá'}
                 </p>
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600 dark:text-gray-400">Sort by:</label>
+                  <label className="text-sm text-gray-600 dark:text-gray-400">Sắp xếp:</label>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
                     className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="highest">Highest Rating</option>
-                    <option value="lowest">Lowest Rating</option>
-                    <option value="helpful">Most Helpful</option>
+                    <option value="newest">Mới nhất</option>
+                    <option value="oldest">Cũ nhất</option>
+                    <option value="highest">Đánh giá cao nhất</option>
+                    <option value="lowest">Đánh giá thấp nhất</option>
+                    <option value="helpful">Hữu ích nhất</option>
                   </select>
                 </div>
               </div>
@@ -496,12 +496,12 @@ export const ProductDetail = () => {
             {isAuthenticated ? (
               <div id="review-form" className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6 border-2 border-transparent hover:border-indigo-500/30 transition-colors">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-                  Write a Review
+                  Viết Đánh Giá
                 </h3>
                 <form onSubmit={handleSubmitReview}>
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Rating
+                      Xếp hạng
                     </label>
                     <div className="flex gap-2">
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -524,7 +524,7 @@ export const ProductDetail = () => {
                   </div>
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Your Review <span className="text-red-500">*</span>
+                      Đánh Giá Của Bạn <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       value={newReviewComment}
@@ -533,24 +533,24 @@ export const ProductDetail = () => {
                       rows={4}
                       required
                       minLength={10}
-                      placeholder="Share your experience with this product (minimum 10 characters)..."
+                      placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này (tối thiểu 10 ký tự)..."
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {newReviewComment.length}/500 characters {newReviewComment.length < 10 && '(minimum 10)'}
+                      {newReviewComment.length}/500 ký tự {newReviewComment.length < 10 && '(tối thiểu 10)'}
                     </p>
                   </div>
                   <Button type="submit" disabled={isSubmitting || newReviewComment.trim().length < 10} isLoading={isSubmitting}>
-                    {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                    {isSubmitting ? 'Đang gửi...' : 'Gửi Đánh Giá'}
                   </Button>
                 </form>
               </div>
             ) : (
               <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6 text-center">
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Please log in to write a review
+                  Vui lòng đăng nhập để viết đánh giá
                 </p>
                 <Link to="/login" className="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
-                  Log In
+                  Đăng Nhập
                 </Link>
               </div>
             )}
@@ -563,10 +563,10 @@ export const ProductDetail = () => {
                     <StarIcon className="w-16 h-16 mx-auto" />
                   </div>
                   <p className="text-gray-600 dark:text-gray-400 text-lg mb-2">
-                    No reviews yet
+                    Chưa có đánh giá
                   </p>
                   <p className="text-gray-500 dark:text-gray-500 text-sm">
-                    Be the first to share your experience with this product!
+                    Hãy là người đầu tiên chia sẻ trải nghiệm về sản phẩm này!
                   </p>
                 </div>
               )}
@@ -576,7 +576,7 @@ export const ProductDetail = () => {
                     <div>
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Rating
+                          Xếp hạng
                         </label>
                         <div className="flex gap-2">
                           {[1, 2, 3, 4, 5].map((star) => (
@@ -604,9 +604,9 @@ export const ProductDetail = () => {
                         rows={4}
                       />
                       <div className="flex gap-2">
-                        <Button onClick={() => handleUpdateReview(review.id)}>Save</Button>
+                        <Button onClick={() => handleUpdateReview(review.id)}>Lưu</Button>
                         <Button variant="outline" onClick={() => setEditingReviewId(null)}>
-                          Cancel
+                          Hủy
                         </Button>
                       </div>
                     </div>
@@ -662,7 +662,7 @@ export const ProductDetail = () => {
                           className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1"
                         >
                           <ThumbsUpIcon className="w-4 h-4" />
-                          Helpful ({review.helpful})
+                          Hữu ích ({review.helpful})
                         </button>
                       </div>
                     </div>
