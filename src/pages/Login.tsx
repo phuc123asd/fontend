@@ -8,9 +8,7 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const {
-    login
-  } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +23,7 @@ export const Login = () => {
       setIsLoading(false);
     }
   };
-  const handleSocialLogin = (provider: string) => {
-    // Simulate social login
-    console.log(`Logging in with ${provider}`);
-    // In a real app, this would redirect to the OAuth provider
-  };
+
   return <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
@@ -42,30 +36,6 @@ export const Login = () => {
               tạo tài khoản mới
             </Link>
           </p>
-        </div>
-        <div className="space-y-3">
-          <button onClick={() => handleSocialLogin('google')} className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 mr-2" />
-            Tiếp tục với Google
-          </button>
-          <button onClick={() => handleSocialLogin('facebook')} className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <img src="https://www.facebook.com/favicon.ico" alt="Facebook" className="w-5 h-5 mr-2" />
-            Tiếp tục với Facebook
-          </button>
-          <button onClick={() => handleSocialLogin('apple')} className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <img src="https://www.apple.com/favicon.ico" alt="Apple" className="w-5 h-5 mr-2" />
-            Tiếp tục với Apple
-          </button>
-        </div>
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
-              Hoặc tiếp tục với email
-            </span>
-          </div>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">

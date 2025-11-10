@@ -50,7 +50,7 @@ export const HeroSection = () => {
           </div>
           <div className="hidden md:block">
             <div className="relative">
-              <img src="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80" alt="Latest iPhone Pro" className="rounded-lg shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500" />
+              <img src="https://images.unsplash.com/photo-1604297643300-5362c8d679f0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTM5fHxtYWMlMjBib29rfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600" alt="Latest iPhone Pro" className="rounded-lg shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500" />
               <img src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80" alt="MacBook Pro" className="absolute -bottom-16 -left-16 w-64 rounded-lg shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-500" />
             </div>
           </div>

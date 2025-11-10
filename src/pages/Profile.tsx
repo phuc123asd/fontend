@@ -53,7 +53,7 @@ export const Profile = () => {
       newErrors.email = 'Email không hợp lệ';
     }
     
-    if (formData.phone && !/^[\d\s\-\+\(\)]+$/.test(formData.phone)) {
+    if (formData.phone && !/^[\d\s\-+()]+$/.test(formData.phone)) {
       newErrors.phone = 'Số điện thoại không hợp lệ';
     }
     
