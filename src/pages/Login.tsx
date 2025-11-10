@@ -90,11 +90,6 @@ export const Login = () => {
               {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </Button>
           </div>
-          <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-            <p className="mb-2">Tài khoản demo:</p>
-            <p>Quản trị viên: admin@example.com (bất kỳ mật khẩu nào)</p>
-            <p>Khách hàng: email khác bất kỳ</p>
-          </div>
         </form>
       </div>
     </div>;

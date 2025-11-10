@@ -1,145 +1,320 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { UserIcon, MailIcon, LockIcon, AlertCircleIcon } from 'lucide-react';
+import {
+  AlertCircleIcon,
+  UserIcon,
+  MailIcon,
+  LockIcon,
+  PhoneIcon,
+} from 'lucide-react';
+
 export const Register = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirm_password: '',
+    first_name: '',
+    last_name: '',
+    phone: '',
+    address: '',
+    city: '',
+    province: '',
+    postal_code: '',
+  });
+
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const {
-    register
-  } = useAuth();
   const navigate = useNavigate();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (password !== confirmPassword) {
-      setError('Mật khẩu không khớp');
+    setSuccess('');
+
+    if (formData.password !== formData.confirm_password) {
+      setError('Mật khẩu xác nhận không khớp!');
       return;
     }
-    if (password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự');
-      return;
-    }
+
     setIsLoading(true);
+
     try {
-      await register(name, email, password);
-      navigate('/');
-    } catch (err) {
-      setError('Đăng ký thất bại. Vui lòng thử lại.');
+      const response = await fetch('http://127.0.0.1:8000/api/customer/register/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          province: formData.province,
+          postal_code: formData.postal_code,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Đăng ký thất bại. Vui lòng thử lại!');
+      }
+
+      // ✅ Thành công
+      setSuccess('Đăng ký thành công! Đang chuyển hướng...');
+      console.log('✅ User ID:', data.id);
+
+      // Chuyển hướng sau 2 giây
+      setTimeout(() => navigate('/login'), 2000);
+    } catch (err: any) {
+      setError(err.message || 'Đăng ký thất bại!');
     } finally {
       setIsLoading(false);
     }
   };
-  const handleSocialLogin = (provider: string) => {
-    // Simulate social login
-    console.log(`Registering with ${provider}`);
-    // In a real app, this would redirect to the OAuth provider
-  };
-  return <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
             Tạo tài khoản mới
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Hoặc{' '}
-            <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-              đăng nhập vào tài khoản có sẵn
+            Đã có tài khoản?{' '}
+            <Link
+              to="/login"
+              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+            >
+              Đăng nhập
             </Link>
           </p>
         </div>
-        <div className="space-y-3">
-          <button onClick={() => handleSocialLogin('google')} className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 mr-2" />
-            Tiếp tục với Google
-          </button>
-          <button onClick={() => handleSocialLogin('facebook')} className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <img src="https://www.facebook.com/favicon.ico" alt="Facebook" className="w-5 h-5 mr-2" />
-            Tiếp tục với Facebook
-          </button>
-          <button onClick={() => handleSocialLogin('apple')} className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <img src="https://www.apple.com/favicon.ico" alt="Apple" className="w-5 h-5 mr-2" />
-            Tiếp tục với Apple
-          </button>
-        </div>
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
-              Hoặc tiếp tục với email
-            </span>
-          </div>
-        </div>
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+          {error && (
+            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
               <div className="flex">
                 <AlertCircleIcon className="h-5 w-5 text-red-400" />
                 <div className="ml-3">
-                  <p className="text-sm text-red-800 dark:text-red-200">
-                    {error}
-                  </p>
+                  <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                 </div>
-              </div>
-            </div>}
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Họ và tên
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <UserIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input id="name" name="name" type="text" required value={name} onChange={e => setName(e.target.value)} className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="Nguyễn Văn A" />
               </div>
             </div>
+          )}
+
+          {success && (
+            <div className="rounded-md bg-green-50 dark:bg-green-900/20 p-4">
+              <p className="text-sm text-green-800 dark:text-green-200">{success}</p>
+            </div>
+          )}
+
+          <div className="rounded-md shadow-sm space-y-4">
+            {/* Họ và Tên */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Địa chỉ email
+              <label
+                htmlFor="first_name"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Họ
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MailIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input id="email" name="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="email@example.com" />
+                <UserIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <input
+                  id="first_name"
+                  name="first_name"
+                  type="text"
+                  required
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  className="pl-10 w-full border rounded-md p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
               </div>
             </div>
+
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="last_name"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Tên
+              </label>
+              <div className="relative">
+                <UserIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <input
+                  id="last_name"
+                  name="last_name"
+                  type="text"
+                  required
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  className="pl-10 w-full border rounded-md p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Email
+              </label>
+              <div className="relative">
+                <MailIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="pl-10 w-full border rounded-md p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            {/* Mật khẩu */}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Mật khẩu
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LockIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input id="password" name="password" type="password" autoComplete="new-password" required value={password} onChange={e => setPassword(e.target.value)} className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="••••••••" />
+                <LockIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="pl-10 w-full border rounded-md p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
               </div>
             </div>
+
+            {/* Xác nhận mật khẩu */}
             <div>
-              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="confirm_password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Xác nhận mật khẩu
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LockIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input id="confirm-password" name="confirm-password" type="password" autoComplete="new-password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="••••••••" />
+                <LockIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <input
+                  id="confirm_password"
+                  name="confirm_password"
+                  type="password"
+                  required
+                  value={formData.confirm_password}
+                  onChange={handleChange}
+                  className="pl-10 w-full border rounded-md p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
               </div>
             </div>
+
+            {/* Các thông tin khác */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Số điện thoại
+              </label>
+              <div className="relative">
+                <PhoneIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <input
+                  id="phone"
+                  name="phone"
+                  type="text"
+                  required
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="pl-10 w-full border rounded-md p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Địa chỉ
+              </label>
+              <input
+                id="address"
+                name="address"
+                type="text"
+                required
+                value={formData.address}
+                onChange={handleChange}
+                className="w-full border rounded-md p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Thành phố
+              </label>
+              <input
+                id="city"
+                name="city"
+                type="text"
+                required
+                value={formData.city}
+                onChange={handleChange}
+                className="w-full border rounded-md p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="province" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Tỉnh/Thành
+              </label>
+              <input
+                id="province"
+                name="province"
+                type="text"
+                required
+                value={formData.province}
+                onChange={handleChange}
+                className="w-full border rounded-md p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="postal_code" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Mã bưu điện
+              </label>
+              <input
+                id="postal_code"
+                name="postal_code"
+                type="text"
+                required
+                value={formData.postal_code}
+                onChange={handleChange}
+                className="w-full border rounded-md p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              />
+            </div>
           </div>
+
           <div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
+              {isLoading ? 'Đang xử lý...' : 'Đăng ký'}
             </Button>
           </div>
         </form>
       </div>
-    </div>;
+    </div>
+  );
 };
