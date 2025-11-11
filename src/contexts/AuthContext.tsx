@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/customer/login/', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/customer/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -126,7 +126,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const register = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/customer/register/', {
+      const response = await fetch('${import.meta.env.VITE_API_URL}/customer/register/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -173,7 +173,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchUserInfoAfterLogin = async (userId: string) => {
     try {
       console.log('Fetching user info for:', userId);
-      const response = await fetch(`http://127.0.0.1:8000/api/customer/get_customer/${userId}/`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/customer/get_customer/${userId}/`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch user info');
@@ -212,7 +212,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(true);
     try {
       console.log('Fetching user info for:', user._id);
-      const response = await fetch(`http://127.0.0.1:8000/api/customer/get_customer/${user._id}/`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/customer/get_customer/${user._id}/`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch user info');
@@ -252,7 +252,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     try {
       console.log('Fetching orders for user:', user._id);
-      const response = await fetch(`http://127.0.0.1:8000/api/order/customer/${user._id}/`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/order/customer/${user._id}/`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch user orders');

@@ -272,7 +272,7 @@ export const ProductDetail: React.FC = () => {
     setReviewsError(null);
     
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/review/get_by_id/${productId}/`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/review/get_by_id/${productId}/`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -325,7 +325,7 @@ export const ProductDetail: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/products/${paramId}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/products/${paramId}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -475,7 +475,7 @@ export const ProductDetail: React.FC = () => {
         comment: newReviewComment.trim(),
       };
 
-      const resp = await fetch('http://127.0.0.1:8000/api/review/add/', {
+      const resp = await fetch(`${import.meta.env.VITE_API_URL}/review/add/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -44,7 +44,7 @@ export const OrderDetail = () => {
     setError(null);
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/order/${orderId}/`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/order/${orderId}/`);
       
       if (!response.ok) {
         if (response.status === 404) {

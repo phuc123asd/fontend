@@ -36,7 +36,7 @@ export const Profile = () => {
 
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/api/customer/get_customer/${userId}/`
+          `${import.meta.env.VITE_API_URL}/customer/get_customer/${userId}/`
         );
         if (!res.ok) throw new Error('Không lấy được thông tin khách hàng');
         const data = await res.json();
@@ -101,7 +101,7 @@ export const Profile = () => {
 
     try {
       const res = await fetch(
-        `http://127.0.0.1:8000/api/customer/up_date/${userId}/`,
+        `${import.meta.env.VITE_API_URL}/customer/up_date/${userId}/`,
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },

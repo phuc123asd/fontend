@@ -51,7 +51,7 @@ export const Shop = () => {
 
   // Fetch từ API và ép kiểu
   useEffect(() => {
-  fetch('http://127.0.0.1:8000/api/products')
+  fetch(`${import.meta.env.VITE_API_URL}/products`)
     .then(res => res.json())
     .then(data => {
       const apiProducts = data.data || data;
