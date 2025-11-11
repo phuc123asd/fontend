@@ -18,6 +18,26 @@ interface User {
   avatar?: string;
 }
 
+// Thêm interface cho Order
+interface Order {
+  id: string;
+  customer: string;
+  items: {
+    product: string;
+    quantity: number;
+    price: number;
+  }[];
+  total_price: number;
+  status: string;
+  shipping_address: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  phone: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
@@ -25,6 +45,7 @@ interface AuthContextType {
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
   fetchUserInfo: () => Promise<void>;
+  fetchUserOrders: () => Promise<Order[]>; // Thêm hàm lấy danh sách đơn hàng
   isAuthenticated: boolean;
   isAdmin: boolean;
   isLoading: boolean;
@@ -86,10 +107,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         _id: data.id,
         id: data.id,
         email,
-        role: data.role === 'admin' ? 'admin' : 'customer', // ✅ ép kiểu
+        role: data.role === 'admin' ? 'admin' : 'customer',
         avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(email)}`,
       };
-
 
       setUser(basicUser);
       
@@ -134,8 +154,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         id: data.id,
         email,
         name,
-        role: 'customer', // mặc định là customer
+        role: 'customer',
       };
+
       setUser(basicUser);
       
       // Fetch thông tin chi tiết sau khi đăng ký thành công
@@ -152,7 +173,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchUserInfoAfterLogin = async (userId: string) => {
     try {
       console.log('Fetching user info for:', userId);
-      // SỬA URL API ĐÚNG
       const response = await fetch(`http://127.0.0.1:8000/api/customer/get_customer/${userId}/`);
       
       if (!response.ok) {
@@ -183,7 +203,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // ✅ Hàm lấy thông tin người dùng từ API
+  // Hàm lấy thông tin người dùng từ API
   const fetchUserInfo = async () => {
     if (!user || !user._id) {
       throw new Error('User not authenticated');
@@ -192,7 +212,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(true);
     try {
       console.log('Fetching user info for:', user._id);
-      // SỬA URL API ĐÚNG
       const response = await fetch(`http://127.0.0.1:8000/api/customer/get_customer/${user._id}/`);
       
       if (!response.ok) {
@@ -225,6 +244,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  //  Hàm lấy danh sách đơn hàng của người dùng
+  const fetchUserOrders = async (): Promise<Order[]> => {
+    if (!user || !user._id) {
+      throw new Error('User not authenticated');
+    }
+    
+    try {
+      console.log('Fetching orders for user:', user._id);
+      const response = await fetch(`http://127.0.0.1:8000/api/order/customer/${user._id}/`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch user orders');
+      }
+      
+      const data = await response.json();
+      console.log('Orders data received:', data);
+      
+      return data; // Trả về mảng các đơn hàng
+    } catch (error) {
+      console.error('Error fetching user orders:', error);
+      throw error;
+    }
+  };
+
   const logout = () => {
     setUser(null);
   };
@@ -245,6 +288,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout, 
         updateUser, 
         fetchUserInfo,
+        fetchUserOrders, // Thêm vào provider
         isAuthenticated, 
         isAdmin,
         isLoading
