@@ -92,25 +92,29 @@ export const Checkout = () => {
     setStep(2);
   };
 
+  // CẬP NHẬT: Hàm xử lý thanh toán với API mới
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
     try {
+      // Tạo đơn hàng với cấu trúc body mới theo API
       const orderData = {
-        customer_id: user?._id || user?.id,
+        customer: user?._id || user?.id,
         items: cartItems.map(item => ({
-          product_id: item.id,
+          product: item.id,
           quantity: item.quantity,
           price: item.price
         })),
-        shipping_info: shippingInfo,
-        payment_method: paymentInfo.method,
-        total_amount: cartTotal + (cartTotal * 0.1),
-        status: 'pending'
+        shipping_address: shippingInfo.address,
+        city: shippingInfo.city,
+        province: shippingInfo.state,
+        postal_code: shippingInfo.zipCode,
+        phone: shippingInfo.phone
       };
       
-      const response = await fetch('http://127.0.0.1:8000/api/orders/', {
+      // Gọi API mới để tạo đơn hàng
+      const response = await fetch('http://127.0.0.1:8000/api/order/create/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,15 +126,25 @@ export const Checkout = () => {
         throw new Error('Failed to create order');
       }
       
-      const order = await response.json();
+      const result = await response.json();
+      console.log(result);
       
+      // Kiểm tra response theo định dạng mới
+      if (result.message !== 'Order created successfully') {
+        throw new Error(result.error || 'Failed to create order');
+      }
+      
+      const order = result.order;
+      
+      // Xử lý theo từng phương thức thanh toán
       if (paymentInfo.method === 'momo') {
-        window.location.href = `https://payment.momo.vn?orderId=${order.id}&amount=${order.total_amount}`;
+        window.location.href = `https://payment.momo.vn?orderId=${order.id}&amount=${order.total_price}`;
       } else if (paymentInfo.method === 'qr') {
         // Đánh dấu đơn hàng là đang chờ thanh toán qua QR
         showNotification('success', 'Đơn hàng đã được tạo. Vui lòng hoàn tất thanh toán bằng cách quét mã QR.');
         // Không xóa giỏ hàng ngay, chỉ xóa sau khi thanh toán thành công
       } else {
+        // Tiền mặt - đơn hàng đã được tạo thành công
         clearCart();
         showNotification('success', 'Đặt hàng thành công!');
         setTimeout(() => {
