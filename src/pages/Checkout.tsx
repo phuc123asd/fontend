@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
-import { CreditCardIcon, LockIcon, CheckCircleIcon } from 'lucide-react';
+import { LockIcon, CheckCircleIcon, QrCodeIcon, DollarSignIcon, SmartphoneIcon, AlertCircleIcon, CopyIcon } from 'lucide-react';
+
 export const Checkout = () => {
   const {
     cartItems,
@@ -12,53 +13,180 @@ export const Checkout = () => {
   } = useCart();
   const {
     isAuthenticated,
-    user
+    user,
+    fetchUserInfo,
+    isLoading: authLoading
   } = useAuth();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [step, setStep] = useState(1);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error';
+    message: string;
+    show: boolean;
+  }>({ type: 'success', message: '', show: false });
+  
   const [shippingInfo, setShippingInfo] = useState({
-    fullName: user?.name || '',
-    email: user?.email || '',
+    fullName: '',
+    email: '',
     address: '',
     city: '',
     state: '',
     zipCode: '',
     phone: ''
   });
+  
   const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: '',
-    cardName: '',
-    expiryDate: '',
-    cvv: '',
-    saveCard: false
+    method: 'cod',
+    momoPhone: '',
+    qrCode: '' // Không cần thiết nữa nhưng giữ lại để tương thích
   });
+
+  // Thông tin tài khoản ngân hàng của bạn
+  const bankInfo = {
+    accountName: "NGUYEN VAN A", // Tên chủ tài khoản
+    accountNumber: "123456789", // Số tài khoản
+    bankName: "Vietcombank", // Tên ngân hàng
+    branch: "Chi nhánh ABC", // Chi nhánh
+    qrCodeImage: "../../img/456.jpg" // Đường dẫn đến hình ảnh QR code của bạn
+  };
+
+  // useEffect được đơn giản hóa, chỉ còn nhiệm vụ điền form
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('User data in Checkout:', user);
+      setShippingInfo({
+        fullName: user.name || user.first_name || '',
+        email: user.email || '',
+        address: user.address || '',
+        city: user.city || '',
+        state: user.state || user.province || '',
+        zipCode: user.zipCode || user.postal_code || '',
+        phone: user.phone || ''
+      });
+    }
+  }, [isAuthenticated, user]);
+
+  // Hàm hiển thị thông báo
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message, show: true });
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }));
+    }, 3000);
+  };
+
+  // Hàm sao chép thông tin tài khoản
+  const copyBankInfo = () => {
+    const info = `STK: ${bankInfo.accountName}\nSố tài khoản: ${bankInfo.accountNumber}\nNgân hàng: ${bankInfo.bankName}\nChi nhánh: ${bankInfo.branch}\nSố tiền: $${total.toFixed(2)}`;
+    
+    navigator.clipboard.writeText(info).then(() => {
+      showNotification('success', 'Đã sao chép thông tin tài khoản');
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      showNotification('error', 'Không thể sao chép thông tin');
+    });
+  };
+
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setStep(2);
   };
+
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    // Create order
-    const orderId = Math.floor(Math.random() * 1000000);
-    clearCart();
-    setIsProcessing(false);
-    navigate(`/orders/${orderId}`);
+    
+    try {
+      const orderData = {
+        customer_id: user?._id || user?.id,
+        items: cartItems.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        shipping_info: shippingInfo,
+        payment_method: paymentInfo.method,
+        total_amount: cartTotal + (cartTotal * 0.1),
+        status: 'pending'
+      };
+      
+      const response = await fetch('http://127.0.0.1:8000/api/orders/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create order');
+      }
+      
+      const order = await response.json();
+      
+      if (paymentInfo.method === 'momo') {
+        window.location.href = `https://payment.momo.vn?orderId=${order.id}&amount=${order.total_amount}`;
+      } else if (paymentInfo.method === 'qr') {
+        // Đánh dấu đơn hàng là đang chờ thanh toán qua QR
+        showNotification('success', 'Đơn hàng đã được tạo. Vui lòng hoàn tất thanh toán bằng cách quét mã QR.');
+        // Không xóa giỏ hàng ngay, chỉ xóa sau khi thanh toán thành công
+      } else {
+        clearCart();
+        showNotification('success', 'Đặt hàng thành công!');
+        setTimeout(() => {
+          navigate(`/orders/${order.id}`);
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      showNotification('error', 'Đã xảy ra lỗi khi xử lý thanh toán. Vui lòng thử lại.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
-  if (cartItems.length === 0) {
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Đang tải thông tin...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || cartItems.length === 0) {
     navigate('/cart');
     return null;
   }
+
   const tax = cartTotal * 0.1;
   const total = cartTotal + tax;
-  return <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+      {/* Notification */}
+      {notification.show && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-2 ${
+          notification.type === 'success' 
+            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
+            : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+        }`}>
+          {notification.type === 'success' ? (
+            <CheckCircleIcon className="w-5 h-5" />
+          ) : (
+            <AlertCircleIcon className="w-5 h-5" />
+          )}
+          <span>{notification.message}</span>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
           Thanh Toán
         </h1>
+        
         {/* Progress Steps */}
         <div className="mb-8">
           <div className="flex items-center justify-center">
@@ -81,10 +209,12 @@ export const Checkout = () => {
             </span>
           </div>
         </div>
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            {step === 1 ? <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+            {step === 1 ? (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
                   Thông Tin Giao Hàng
                 </h2>
@@ -94,127 +224,251 @@ export const Checkout = () => {
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Họ và Tên
                       </label>
-                      <input type="text" required value={shippingInfo.fullName} onChange={e => setShippingInfo({
-                    ...shippingInfo,
-                    fullName: e.target.value
-                  })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                      <input 
+                        type="text" 
+                        required 
+                        value={shippingInfo.fullName} 
+                        onChange={e => setShippingInfo({
+                          ...shippingInfo,
+                          fullName: e.target.value
+                        })} 
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                      />
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Email
                       </label>
-                      <input type="email" required value={shippingInfo.email} onChange={e => setShippingInfo({
-                    ...shippingInfo,
-                    email: e.target.value
-                  })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                      <input 
+                        type="email" 
+                        required 
+                        value={shippingInfo.email} 
+                        onChange={e => setShippingInfo({
+                          ...shippingInfo,
+                          email: e.target.value
+                        })} 
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                      />
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Địa Chỉ
                       </label>
-                      <input type="text" required value={shippingInfo.address} onChange={e => setShippingInfo({
-                    ...shippingInfo,
-                    address: e.target.value
-                  })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                      <input 
+                        type="text" 
+                        required 
+                        value={shippingInfo.address} 
+                        onChange={e => setShippingInfo({
+                          ...shippingInfo,
+                          address: e.target.value
+                        })} 
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Thành Phố
                       </label>
-                      <input type="text" required value={shippingInfo.city} onChange={e => setShippingInfo({
-                    ...shippingInfo,
-                    city: e.target.value
-                  })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                      <input 
+                        type="text" 
+                        required 
+                        value={shippingInfo.city} 
+                        onChange={e => setShippingInfo({
+                          ...shippingInfo,
+                          city: e.target.value
+                        })} 
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Tỉnh/Thành
                       </label>
-                      <input type="text" required value={shippingInfo.state} onChange={e => setShippingInfo({
-                    ...shippingInfo,
-                    state: e.target.value
-                  })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                      <input 
+                        type="text" 
+                        required 
+                        value={shippingInfo.state} 
+                        onChange={e => setShippingInfo({
+                          ...shippingInfo,
+                          state: e.target.value
+                        })} 
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Mã Bưu Điện
                       </label>
-                      <input type="text" required value={shippingInfo.zipCode} onChange={e => setShippingInfo({
-                    ...shippingInfo,
-                    zipCode: e.target.value
-                  })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                      <input 
+                        type="text" 
+                        required 
+                        value={shippingInfo.zipCode} 
+                        onChange={e => setShippingInfo({
+                          ...shippingInfo,
+                          zipCode: e.target.value
+                        })} 
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Số Điện Thoại
                       </label>
-                      <input type="tel" required value={shippingInfo.phone} onChange={e => setShippingInfo({
-                    ...shippingInfo,
-                    phone: e.target.value
-                  })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                      <input 
+                        type="tel" 
+                        required 
+                        value={shippingInfo.phone} 
+                        onChange={e => setShippingInfo({
+                          ...shippingInfo,
+                          phone: e.target.value
+                        })} 
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                      />
                     </div>
                   </div>
                   <Button type="submit" className="w-full mt-6">
                     Tiếp Tục Thanh Toán
                   </Button>
                 </form>
-              </div> : <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+              </div>
+            ) : (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                   <LockIcon className="w-5 h-5 mr-2 text-green-600" />
-                  Thông Tin Thanh Toán
+                  Phương Thức Thanh Toán
                 </h2>
                 <form onSubmit={handlePaymentSubmit}>
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Số Thẻ
-                      </label>
-                      <div className="relative">
-                        <input type="text" required placeholder="1234 5678 9012 3456" value={paymentInfo.cardNumber} onChange={e => setPaymentInfo({
-                      ...paymentInfo,
-                      cardNumber: e.target.value
-                    })} className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
-                        <CreditCardIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Thanh toán khi nhận hàng */}
+                      <div 
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                          paymentInfo.method === 'cod' 
+                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' 
+                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                        }`}
+                        onClick={() => setPaymentInfo({ ...paymentInfo, method: 'cod' })}
+                      >
+                        <div className="flex flex-col items-center">
+                          <DollarSignIcon className="w-8 h-8 text-indigo-600 mb-2" />
+                          <h3 className="font-medium text-gray-900 dark:text-white">Tiền Mặt</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-1">
+                            Thanh toán khi nhận hàng
+                          </p>
+                        </div>
+                        {paymentInfo.method === 'cod' && (
+                          <div className="mt-2 flex justify-center">
+                            <CheckCircleIcon className="w-5 h-5 text-indigo-600" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Thanh toán qua Momo */}
+                      <div 
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                          paymentInfo.method === 'momo' 
+                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' 
+                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                        }`}
+                        onClick={() => setPaymentInfo({ ...paymentInfo, method: 'momo' })}
+                      >
+                        <div className="flex flex-col items-center">
+                          <SmartphoneIcon className="w-8 h-8 text-indigo-600 mb-2" />
+                          <h3 className="font-medium text-gray-900 dark:text-white">Ví MoMo</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-1">
+                            Thanh toán qua ví điện tử
+                          </p>
+                        </div>
+                        {paymentInfo.method === 'momo' && (
+                          <div className="mt-2 flex justify-center">
+                            <CheckCircleIcon className="w-5 h-5 text-indigo-600" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Thanh toán qua QR Code */}
+                      <div 
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                          paymentInfo.method === 'qr' 
+                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' 
+                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                        }`}
+                        onClick={() => setPaymentInfo({ ...paymentInfo, method: 'qr' })}
+                      >
+                        <div className="flex flex-col items-center">
+                          <QrCodeIcon className="w-8 h-8 text-indigo-600 mb-2" />
+                          <h3 className="font-medium text-gray-900 dark:text-white">Chuyển Khoản</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-1">
+                            Quét mã để thanh toán
+                          </p>
+                        </div>
+                        {paymentInfo.method === 'qr' && (
+                          <div className="mt-2 flex justify-center">
+                            <CheckCircleIcon className="w-5 h-5 text-indigo-600" />
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Tên Chủ Thẻ
-                      </label>
-                      <input type="text" required value={paymentInfo.cardName} onChange={e => setPaymentInfo({
-                    ...paymentInfo,
-                    cardName: e.target.value
-                  })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
+
+                    {/* Hiển thị thông tin bổ sung theo từng phương thức */}
+                    {paymentInfo.method === 'momo' && (
+                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Ngày Hết Hạn
+                          Số điện thoại MoMo
                         </label>
-                        <input type="text" required placeholder="MM/YY" value={paymentInfo.expiryDate} onChange={e => setPaymentInfo({
-                      ...paymentInfo,
-                      expiryDate: e.target.value
-                    })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                        <input 
+                          type="tel" 
+                          placeholder="Nhập số điện thoại đã đăng ký MoMo" 
+                          value={paymentInfo.momoPhone} 
+                          onChange={e => setPaymentInfo({
+                            ...paymentInfo,
+                            momoPhone: e.target.value
+                          })} 
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                        />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          CVV
-                        </label>
-                        <input type="text" required placeholder="123" value={paymentInfo.cvv} onChange={e => setPaymentInfo({
-                      ...paymentInfo,
-                      cvv: e.target.value
-                    })} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                    )}
+
+                    {paymentInfo.method === 'qr' && (
+                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+                            Quét mã QR để thanh toán
+                          </p>
+                          
+                          {/* Hình ảnh QR Code cố định của bạn */}
+                          <img 
+                            src={bankInfo.qrCodeImage} 
+                            alt="Bank QR Code" 
+                            className="mx-auto w-48 h-48 object-contain mb-4 border-2 border-gray-200 rounded-lg"
+                          />
+                          
+                          {/* Thông tin tài khoản ngân hàng */}
+                          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4">
+                            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                              Thông tin chuyển khoản
+                            </h4>
+                            <div className="text-left space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                              <p><span className="font-medium">Ngân hàng:</span> {bankInfo.bankName}</p>
+                              <p><span className="font-medium">Chủ tài khoản:</span> {bankInfo.accountName}</p>
+                              <p><span className="font-medium">Số tài khoản:</span> {bankInfo.accountNumber}</p>
+                              <p><span className="font-medium">Chi nhánh:</span> {bankInfo.branch}</p>
+                              <p><span className="font-medium">Số tiền:</span> <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">${total.toFixed(2)}</span></p>
+                            </div>
+                          </div>
+                          
+                          {/* Nút sao chép thông tin */}
+                          <button
+                            type="button"
+                            onClick={copyBankInfo}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+                          >
+                            <CopyIcon className="w-4 h-4" />
+                            Sao chép thông tin
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center">
-                      <input type="checkbox" id="saveCard" checked={paymentInfo.saveCard} onChange={e => setPaymentInfo({
-                    ...paymentInfo,
-                    saveCard: e.target.checked
-                  })} className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
-                      <label htmlFor="saveCard" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                        Lưu thẻ cho lần mua sau
-                      </label>
-                    </div>
+                    )}
                   </div>
                   <div className="flex gap-4 mt-6">
                     <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1">
@@ -225,8 +479,10 @@ export const Checkout = () => {
                     </Button>
                   </div>
                 </form>
-              </div>}
+              </div>
+            )}
           </div>
+          
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 sticky top-24">
@@ -234,7 +490,8 @@ export const Checkout = () => {
                 Tóm Tắt Đơn Hàng
               </h2>
               <div className="space-y-4 mb-6">
-                {cartItems.map(item => <div key={item.id} className="flex gap-4">
+                {cartItems.map(item => (
+                  <div key={item.id} className="flex gap-4">
                     <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
                     <div className="flex-grow">
                       <h3 className="text-sm font-medium text-gray-900 dark:text-white">
@@ -247,7 +504,8 @@ export const Checkout = () => {
                         ${(item.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
-                  </div>)}
+                  </div>
+                ))}
               </div>
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
@@ -273,5 +531,6 @@ export const Checkout = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };

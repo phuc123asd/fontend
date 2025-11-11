@@ -1,16 +1,21 @@
 import React, { useEffect, useState, createContext, useContext } from 'react';
 
 interface User {
-  id: string; // id từ MongoDB là dạng string
-  name?: string;
+  _id: string; // MongoDB ObjectId
+  id?: string; // For backward compatibility
   email: string;
-  role?: 'customer' | 'admin';
-  avatar?: string;
+  first_name?: string;
+  last_name?: string;
+  name?: string; // Computed from first_name + last_name
   phone?: string;
   address?: string;
   city?: string;
-  state?: string;
-  zipCode?: string;
+  province?: string;
+  state?: string; // For backward compatibility
+  postal_code?: string;
+  zipCode?: string; // For backward compatibility
+  role?: 'customer' | 'admin';
+  avatar?: string;
 }
 
 interface AuthContextType {
@@ -19,25 +24,50 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
+  fetchUserInfo: () => Promise<void>;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // useEffect này chỉ chạy một lần khi ứng dụng khởi động
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const parsedUser = JSON.parse(savedUser);
+          setUser(parsedUser); // Đặt user từ localStorage trước
+
+          // Nếu user đã đăng nhập, tiến hành fetch thông tin chi tiết
+          if (parsedUser._id) {
+            await fetchUserInfoAfterLogin(parsedUser._id);
+          }
+        } catch (error) {
+          console.error("Lỗi khi phân tích dữ liệu người dùng:", error);
+          localStorage.removeItem('user'); // Xóa dữ liệu không hợp lệ
+        }
+      }
+      // Kết thúc quá trình khởi tạo
+      setIsLoading(false);
+    };
+
+    initializeAuth();
+  }, []); // Mảng rỗng để chỉ chạy một lần
 
   useEffect(() => {
     if (user) localStorage.setItem('user', JSON.stringify(user));
     else localStorage.removeItem('user');
   }, [user]);
 
- // ✅ LOGIN (API thật)
   const login = async (email: string, password: string) => {
+    setIsLoading(true);
     try {
       const res = await fetch('http://127.0.0.1:8000/api/customer/login/', {
         method: 'POST',
@@ -51,23 +81,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error(data.error || 'Email hoặc mật khẩu không đúng');
       }
 
-      // 🔹 Nếu chưa có avatar -> tạo avatar mặc định dựa trên email
-      const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(email)}`;
-
-      setUser({
+      // Lưu thông tin cơ bản trước khi fetch thông tin chi tiết
+      const basicUser: User = {
+        _id: data.id,
         id: data.id,
         email,
-        role: 'customer',
-        avatar: avatarUrl,
-      });
+        role: data.role === 'admin' ? 'admin' : 'customer', // ✅ ép kiểu
+        avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(email)}`,
+      };
+
+
+      setUser(basicUser);
+      
+      // Fetch thông tin chi tiết sau khi đăng nhập thành công
+      await fetchUserInfoAfterLogin(data.id);
     } catch (err) {
       console.error('Login error:', err);
       throw err;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // ✅ REGISTER - gọi API thật
   const register = async (name: string, email: string, password: string) => {
+    setIsLoading(true);
     try {
       const response = await fetch('http://127.0.0.1:8000/api/customer/register/', {
         method: 'POST',
@@ -91,17 +128,100 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error(data.error || 'Đăng ký thất bại');
       }
 
-      const newUser: User = {
+      // Lưu thông tin cơ bản trước khi fetch thông tin chi tiết
+      const basicUser: User = {
+        _id: data.id,
         id: data.id,
-        name,
         email,
-        role: 'customer',
+        name,
+        role: 'customer', // mặc định là customer
       };
-
-      setUser(newUser);
+      setUser(basicUser);
+      
+      // Fetch thông tin chi tiết sau khi đăng ký thành công
+      await fetchUserInfoAfterLogin(data.id);
     } catch (error) {
       console.error('Register error:', error);
       throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Hàm lấy thông tin người dùng sau khi đăng nhập/đăng ký
+  const fetchUserInfoAfterLogin = async (userId: string) => {
+    try {
+      console.log('Fetching user info for:', userId);
+      // SỬA URL API ĐÚNG
+      const response = await fetch(`http://127.0.0.1:8000/api/customer/get_customer/${userId}/`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch user info');
+      }
+      
+      const data = await response.json();
+      console.log('User data received:', data);
+      
+      // Tạo tên đầy đủ từ first_name và last_name
+      const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim();
+      
+      // Cập nhật thông tin người dùng với dữ liệu từ API
+      setUser(prevUser => {
+        if (!prevUser) return null;
+        
+        return {
+          ...prevUser,
+          ...data,
+          name: fullName || prevUser.name,
+          state: data.province || prevUser.state, // Map province to state for backward compatibility
+          zipCode: data.postal_code || prevUser.zipCode, // Map postal_code to zipCode for backward compatibility
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching user info after login:', error);
+      // Không throw error ở đây để không làm hỏng quá trình đăng nhập/đăng ký
+    }
+  };
+
+  // ✅ Hàm lấy thông tin người dùng từ API
+  const fetchUserInfo = async () => {
+    if (!user || !user._id) {
+      throw new Error('User not authenticated');
+    }
+    
+    setIsLoading(true);
+    try {
+      console.log('Fetching user info for:', user._id);
+      // SỬA URL API ĐÚNG
+      const response = await fetch(`http://127.0.0.1:8000/api/customer/get_customer/${user._id}/`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch user info');
+      }
+      
+      const data = await response.json();
+      console.log('User data received:', data);
+      
+      // Tạo tên đầy đủ từ first_name và last_name
+      const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim();
+      
+      // Cập nhật thông tin người dùng với dữ liệu từ API
+      setUser(prevUser => {
+        if (!prevUser) return null;
+        
+        return {
+          ...prevUser,
+          ...data,
+          name: fullName || prevUser.name,
+          state: data.province || prevUser.state, // Map province to state for backward compatibility
+          zipCode: data.postal_code || prevUser.zipCode, // Map postal_code to zipCode for backward compatibility
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -118,7 +238,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, register, logout, updateUser, isAuthenticated, isAdmin }}
+      value={{ 
+        user, 
+        login, 
+        register, 
+        logout, 
+        updateUser, 
+        fetchUserInfo,
+        isAuthenticated, 
+        isAdmin,
+        isLoading
+      }}
     >
       {children}
     </AuthContext.Provider>
