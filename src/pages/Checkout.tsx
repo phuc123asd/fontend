@@ -44,11 +44,11 @@ export const Checkout = () => {
 
   // Thông tin tài khoản ngân hàng của bạn
   const bankInfo = {
-    accountName: "NGUYEN VAN A", // Tên chủ tài khoản
-    accountNumber: "123456789", // Số tài khoản
-    bankName: "Vietcombank", // Tên ngân hàng
-    branch: "Chi nhánh ABC", // Chi nhánh
-    qrCodeImage: "../../img/456.jpg" // Đường dẫn đến hình ảnh QR code của bạn
+    accountName: "VO LE HOANG PHUC", // Tên chủ tài khoản
+    accountNumber: "104879691506", // Số tài khoản
+    bankName: "Vietinbank", // Tên ngân hàng
+    branch: "HCM", // Chi nhánh
+    qrCodeImage: "../../img/1.jpg" // Đường dẫn đến hình ảnh QR code của bạn
   };
 
   // useEffect được đơn giản hóa, chỉ còn nhiệm vụ điền form

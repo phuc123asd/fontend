@@ -325,7 +325,7 @@ export const ProductDetail: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/products/${paramId}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/products/${paramId}/`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

@@ -2,15 +2,15 @@ import React from 'react';
 const brands = [{
   id: 1,
   name: 'Apple',
-  logo: 'https://cdn-icons-png.flaticon.com/512/0/747.png'
+  logo: 'https://cdn-icons-png.flaticon.com/128/5977/5977575.png'
 }, {
   id: 2,
   name: 'Samsung',
-  logo: 'https://cdn-icons-png.flaticon.com/512/882/882849.png'
+  logo: 'https://cdn-icons-png.flaticon.com/128/16183/16183659.png'
 }, {
   id: 3,
-  name: 'Sony',
-  logo: 'https://cdn-icons-png.flaticon.com/512/731/731970.png'
+  name: 'Dell',
+  logo: 'https://cdn-icons-png.flaticon.com/128/882/882726.png'
 }, {
   id: 4,
   name: 'Microsoft',
@@ -21,8 +21,8 @@ const brands = [{
   logo: 'https://cdn-icons-png.flaticon.com/512/2702/2702602.png'
 }, {
   id: 6,
-  name: 'Dell',
-  logo: 'https://cdn-icons-png.flaticon.com/512/882/882833.png'
+  name: 'Nvdia',
+  logo: 'https://cdn-icons-png.flaticon.com/128/882/882731.png'
 }];
 export const BrandsShowcase = () => {
   return <section className="py-12 bg-gray-50 dark:bg-gray-800">

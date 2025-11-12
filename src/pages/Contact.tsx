@@ -35,11 +35,11 @@ export const Contact = () => {
   const contactInfo = [{
     icon: <MapPinIcon className="w-6 h-6" />,
     title: 'Ghé Thăm',
-    content: '123 Đường Công Nghệ, Hồ Chí Minh, Việt Nam'
+    content: '123 Đường Xuân Hồng, Hồ Chí Minh, Việt Nam'
   }, {
     icon: <PhoneIcon className="w-6 h-6" />,
     title: 'Gọi Cho Chúng Tôi',
-    content: '+84 (028) 123-4567'
+    content: '+84 (032) 511-6160'
   }, {
     icon: <MailIcon className="w-6 h-6" />,
     title: 'Email',
