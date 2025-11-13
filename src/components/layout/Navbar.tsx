@@ -71,10 +71,6 @@ export const Navbar = () => {
           </nav>
           {/* Right Icons */}
           <div className="flex items-center space-x-3">
-            {/* Search */}
-            <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="p-2 text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
-              <SearchIcon className="w-5 h-5" />
-            </button>
             {/* Theme Toggle */}
             <button onClick={toggleTheme} className="p-2 text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
               {theme === 'dark' ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}

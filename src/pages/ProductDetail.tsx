@@ -505,47 +505,7 @@ export const ProductDetail: React.FC = () => {
   };
 
     // --- CẬP NHẬT: Hàm xóa review bằng cách gọi API ---
-  const handleDeleteReview = (reviewId: string | number) => {
-    console.log("Đang cố gắng xóa review với ID:", reviewId);
-  // Mở hộp thoại xác nhận thay vì window.confirm
-  setConfirmDialog({
-    isOpen: true,
-    message: 'Bạn có chắc chắn muốn xóa đánh giá này? Hành động này không thể hoàn tác.',
-    onConfirm: async () => {
-      try {
-        // Gọi API xóa review (giống hướng dẫn trước đó)
-        const token = localStorage.getItem('authToken');
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/review/${reviewId}/delete/`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Token ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Không thể xóa đánh giá.');
-        }
-
-        if (product.apiId) {
-          await fetchReviews(product.apiId);
-        } else {
-          await fetchReviews(String(product.id));
-        }
-
-        // Nếu API thành công
-        showNotification('success', 'Đã xóa đánh giá của bạn thành công!');
-        setReviews(prev => prev.filter(r => r.id !== reviewId));
-        setConfirmDialog(null); // Đóng hộp thoại
-
-      } catch (error) {
-        console.error('Delete review error:', error);
-        showNotification('error', `Xóa thất bại: ${(error as Error).message}`);
-      }
-    }
-  });
-};
+  
   // Loading và Error UI
   if (loading) {
     return (
@@ -914,9 +874,6 @@ export const ProductDetail: React.FC = () => {
                             </div>
                             {user && String(user.id) === String(review.userId) && (
                               <div className="flex gap-2 ml-4">
-                                <button onClick={() => handleDeleteReview(review.id)} className="text-red-600 hover:text-red-700">
-                                  <TrashIcon className="w-4 h-4" />
-                                </button>
                               </div>
                             )}
                           </div>
