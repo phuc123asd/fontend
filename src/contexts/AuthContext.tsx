@@ -94,6 +94,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
+        credentials: 'include',
       });
 
       const data = await res.json();
@@ -128,6 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/customer/register/`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,

@@ -44,8 +44,9 @@ export const OrderDetail = () => {
     setError(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/order/${orderId}/`);
-      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/order/${orderId}/`, {
+        credentials: 'include', // <-- THÊM DÒNG NÀY
+      });
       if (!response.ok) {
         if (response.status === 404) {
           throw new Error('Không tìm thấy đơn hàng');

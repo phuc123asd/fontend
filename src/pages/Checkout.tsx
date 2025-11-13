@@ -112,6 +112,7 @@ export const Checkout = () => {
         postal_code: shippingInfo.zipCode,
         phone: shippingInfo.phone
       };
+      console.log("Dữ liệu chuẩn bị gửi đi:", orderData);
       
       // Gọi API mới để tạo đơn hàng
       const response = await fetch(`${import.meta.env.VITE_API_URL}/order/create/`, {
@@ -123,16 +124,15 @@ export const Checkout = () => {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to create order');
+        // Lấy thông báo lỗi từ API nếu có
+            const errorData = await response.json();
+            console.error("Lỗi từ API:", errorData);
+            // Ném lỗi với thông báo cụ thể từ API
+            throw new Error(errorData.error || JSON.stringify(errorData));
       }
       
       const result = await response.json();
       console.log(result);
-      
-      // Kiểm tra response theo định dạng mới
-      if (result.message !== 'Order created successfully') {
-        throw new Error(result.error || 'Failed to create order');
-      }
       
       const order = result.order;
       
