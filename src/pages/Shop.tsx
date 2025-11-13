@@ -130,37 +130,53 @@ export const Shop = () => {
   };
 
   // Hàm render pagination với ellipsis
+    // --- HÀM RENDER PAGINATION ĐÃ SỬA LỖI ---
   const renderPagination = () => {
-    const delta = 1;
     const paginationItems: (number | string)[] = [];
+    const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
 
-    // Always add the first page
+    // Nếu không có trang nào, không hiển thị gì
+    if (totalPages <= 1) {
+      return null;
+    }
+
+    // Luôn hiển thị trang đầu tiên
     paginationItems.push(1);
 
-    // Left ellipsis
-    if (currentPage > delta + 2) {
-      paginationItems.push('...');
-    }
-
-    // Add pages around current page
-    const startPage = Math.max(2, currentPage - delta);
-    const endPage = Math.min(totalPages - 1, currentPage + delta);
-    for (let i = startPage; i <= endPage; i++) {
-      paginationItems.push(i);
-    }
-
-    // Right ellipsis
-    if (currentPage < totalPages - delta - 1) {
-      paginationItems.push('...');
-    }
-
-    // Add the last page if not already included
-    if (totalPages > currentPage + delta) {
-      paginationItems.push(totalPages);
+    // Nếu tổng số trang <= 7, hiển thị tất cả các trang
+    if (totalPages <= 7) {
+      for (let i = 2; i <= totalPages; i++) {
+        paginationItems.push(i);
+      }
+    } else {
+      // Nếu trang hiện tại gần đầu (1, 2, 3)
+      if (currentPage <= 3) {
+        for (let i = 2; i <= 5; i++) {
+          paginationItems.push(i);
+        }
+        paginationItems.push('...');
+        paginationItems.push(totalPages);
+      } 
+      // Nếu trang hiện tại ở giữa
+      else if (currentPage > 3 && currentPage < totalPages - 2) {
+        paginationItems.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          paginationItems.push(i);
+        }
+        paginationItems.push('...');
+        paginationItems.push(totalPages);
+      } 
+      // Nếu trang hiện tại gần cuối
+      else {
+        paginationItems.push('...');
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          paginationItems.push(i);
+        }
+      }
     }
 
     return (
-      <nav className="flex items-center space-x-2">
+      <nav className="flex items-center justify-center space-x-1"> {/* Thay đổi gap thành space-x-1 để đồng bộ */}
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}

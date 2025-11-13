@@ -290,7 +290,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout, 
         updateUser, 
         fetchUserInfo,
-        fetchUserOrders, // Thêm vào provider
+        fetchUserOrders,
         isAuthenticated, 
         isAdmin,
         isLoading

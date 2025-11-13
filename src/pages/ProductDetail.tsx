@@ -5,10 +5,9 @@ import { useWishlist } from '../contexts/WishlistContext';
 import { useReviews } from '../contexts/ReviewContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   StarIcon,
-  HeartIcon,
-  ShoppingCartIcon,
   TruckIcon,
   ShieldCheckIcon,
   RotateCcwIcon,
@@ -255,7 +254,6 @@ export const ProductDetail: React.FC = () => {
     show: boolean;
   }>({ type: 'success', message: '', show: false });
 
-  const { addToCart } = useCart();
   const { addToWishlist, isInWishlist, removeFromWishlist } = useWishlist();
   // We'll still use getProductReviews from context as initial source (fallback)
   const { getProductReviews } = useReviews();
@@ -265,6 +263,8 @@ export const ProductDetail: React.FC = () => {
 
   // Local reviews state used by UI (initially from context fallback)
   const [reviews, setReviews] = useState<UiReview[]>([]);
+
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; message: string; onConfirm: () => void } | null>(null);
 
   // Hàm tải reviews từ API
   const fetchReviews = async (productId: string) => {
@@ -418,34 +418,6 @@ export const ProductDetail: React.FC = () => {
 
   const reviewStats = calculateReviewStats();
 
-  const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      addToCart({
-        id: productIdNumeric,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-      });
-    }
-    showNotification('success', 'Đã thêm sản phẩm vào giỏ hàng!');
-  };
-
-  const handleWishlistToggle = () => {
-    if (inWishlist) {
-      removeFromWishlist(productIdNumeric);
-      showNotification('success', 'Đã xóa sản phẩm khỏi danh sách yêu thích!');
-    } else {
-      addToWishlist({
-        id: productIdNumeric,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        category: product.category,
-      });
-      showNotification('success', 'Đã thêm sản phẩm vào danh sách yêu thích!');
-    }
-  };
-
   // --- CẬP NHẬT: submit review to backend API at /api/review/add/ ---
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -532,19 +504,48 @@ export const ProductDetail: React.FC = () => {
     showNotification('success', 'Đã cập nhật đánh giá!');
   };
 
+    // --- CẬP NHẬT: Hàm xóa review bằng cách gọi API ---
   const handleDeleteReview = (reviewId: string | number) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return;
-    // If you have an API to delete, call it here. For now, just update local state.
-    setReviews((prev) => prev.filter((r) => r.id !== reviewId));
-    showNotification('success', 'Đã xóa đánh giá!');
-  };
+    console.log("Đang cố gắng xóa review với ID:", reviewId);
+  // Mở hộp thoại xác nhận thay vì window.confirm
+  setConfirmDialog({
+    isOpen: true,
+    message: 'Bạn có chắc chắn muốn xóa đánh giá này? Hành động này không thể hoàn tác.',
+    onConfirm: async () => {
+      try {
+        // Gọi API xóa review (giống hướng dẫn trước đó)
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/review/${reviewId}/delete/`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${token}`
+          }
+        });
 
-  const handleMarkHelpful = (reviewId: string | number) => {
-    setReviews((prev) => prev.map((r) => (r.id === reviewId ? { ...r, helpful: (r.helpful ?? 0) + 1 } : r)));
-    // If backend supports marking helpful, call it here.
-    showNotification('success', 'Đã đánh giá là hữu ích!');
-  };
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Không thể xóa đánh giá.');
+        }
 
+        if (product.apiId) {
+          await fetchReviews(product.apiId);
+        } else {
+          await fetchReviews(String(product.id));
+        }
+
+        // Nếu API thành công
+        showNotification('success', 'Đã xóa đánh giá của bạn thành công!');
+        setReviews(prev => prev.filter(r => r.id !== reviewId));
+        setConfirmDialog(null); // Đóng hộp thoại
+
+      } catch (error) {
+        console.error('Delete review error:', error);
+        showNotification('error', `Xóa thất bại: ${(error as Error).message}`);
+      }
+    }
+  });
+};
   // Loading và Error UI
   if (loading) {
     return (
@@ -656,7 +657,7 @@ export const ProductDetail: React.FC = () => {
                 <span className="text-4xl font-bold text-gray-900 dark:text-white">${product.price}</span>
                 {product.originalPrice > 0 && <span className="text-2xl text-gray-500 line-through">${product.originalPrice}</span>}
               </div>
-              <p className="text-green-600 dark:text-green-400 mt-2">{product.inStock ? `Còn ${product.stock} sản phẩm` : 'Hết hàng'}</p>
+              {/* <p className="text-green-600 dark:text-green-400 mt-2">{product.inStock ? `Còn ${product.stock} sản phẩm` : 'Hết hàng'}</p> */}
             </div>
 
             <p className="text-gray-600 dark:text-gray-400 mb-6">{product.description}</p>
@@ -913,9 +914,6 @@ export const ProductDetail: React.FC = () => {
                             </div>
                             {user && String(user.id) === String(review.userId) && (
                               <div className="flex gap-2 ml-4">
-                                <button onClick={() => handleEditReview(review.id, review.comment, review.rating)} className="text-indigo-600 hover:text-indigo-700">
-                                  <EditIcon className="w-4 h-4" />
-                                </button>
                                 <button onClick={() => handleDeleteReview(review.id)} className="text-red-600 hover:text-red-700">
                                   <TrashIcon className="w-4 h-4" />
                                 </button>
@@ -924,10 +922,6 @@ export const ProductDetail: React.FC = () => {
                           </div>
                         </div>
                         <p className="text-gray-600 dark:text-gray-400 mb-3">{review.comment}</p>
-                        <button onClick={() => handleMarkHelpful(review.id)} className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1">
-                          <ThumbsUpIcon className="w-4 h-4" />
-                          Hữu ích ({review.helpful ?? 0})
-                        </button>
                       </div>
                     </div>
                   )}

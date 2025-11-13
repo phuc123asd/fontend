@@ -14,7 +14,6 @@ export const Checkout = () => {
   const {
     isAuthenticated,
     user,
-    fetchUserInfo,
     isLoading: authLoading
   } = useAuth();
   const navigate = useNavigate();
@@ -93,12 +92,12 @@ export const Checkout = () => {
   };
 
   // CẬP NHẬT: Hàm xử lý thanh toán với API mới
+    // CẬP NHẬT: Hàm xử lý thanh toán đã tối ưu
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
     try {
-      // Tạo đơn hàng với cấu trúc body mới theo API
       const orderData = {
         customer: user?._id || user?.id,
         items: cartItems.map(item => ({
@@ -112,40 +111,43 @@ export const Checkout = () => {
         postal_code: shippingInfo.zipCode,
         phone: shippingInfo.phone
       };
-      console.log("Dữ liệu chuẩn bị gửi đi:", orderData);
       
-      // Gọi API mới để tạo đơn hàng
       const response = await fetch(`${import.meta.env.VITE_API_URL}/order/create/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
       });
       
       if (!response.ok) {
-        // Lấy thông báo lỗi từ API nếu có
-            const errorData = await response.json();
-            console.error("Lỗi từ API:", errorData);
-            // Ném lỗi với thông báo cụ thể từ API
-            throw new Error(errorData.error || JSON.stringify(errorData));
+        const errorData = await response.json();
+        throw new Error(errorData.error || JSON.stringify(errorData));
       }
       
       const result = await response.json();
-      console.log(result);
+      const order = result.order; // API trả về object order trực tiếp
       
-      const order = result.order;
-      
+      // QUAN TRỌNG: Xóa giỏ hàng ngay sau khi đơn hàng được tạo thành công
+      // Điều này ngăn người dùng tạo lại đơn hàng
+      clearCart(); 
+
       // Xử lý theo từng phương thức thanh toán
       if (paymentInfo.method === 'momo') {
-        window.location.href = `https://payment.momo.vn?orderId=${order.id}&amount=${order.total_price}`;
+        // Mô phỏng thanh toán MoMo
+        showNotification('success', 'Đang chuyển đến cổng thanh toán MoMo...');
+        setTimeout(() => {
+          // Trong thực tế, bạn sẽ chuyển đến URL thanh toán MoMo thực tế
+          // Hiện tại, chúng ta sẽ chuyển đến trang chi tiết đơn hàng
+          navigate(`/orders/${order.id}`);
+        }, 2000);
+
       } else if (paymentInfo.method === 'qr') {
-        // Đánh dấu đơn hàng là đang chờ thanh toán qua QR
-        showNotification('success', 'Đơn hàng đã được tạo. Vui lòng hoàn tất thanh toán bằng cách quét mã QR.');
-        // Không xóa giỏ hàng ngay, chỉ xóa sau khi thanh toán thành công
+        // Thanh toán chuyển khoản
+        showNotification('success', 'Đơn hàng đã tạo. Vui lòng xem thông tin chuyển khoản ở trang chi tiết đơn hàng.');
+        // Chuyển ngay đến trang chi tiết để xem thông tin chuyển khoản
+        navigate(`/orders/${order.id}`);
+
       } else {
-        // Tiền mặt - đơn hàng đã được tạo thành công
-        clearCart();
+        // Thanh toán khi nhận hàng (COD)
         showNotification('success', 'Đặt hàng thành công!');
         setTimeout(() => {
           navigate(`/orders/${order.id}`);
@@ -153,9 +155,16 @@ export const Checkout = () => {
       }
     } catch (error) {
       console.error('Payment error:', error);
-      showNotification('error', 'Đã xảy ra lỗi khi xử lý thanh toán. Vui lòng thử lại.');
-    } finally {
-      setIsProcessing(false);
+      
+      // Xử lý lỗi một cách an toàn
+      let errorMessage = 'Đã xảy ra lỗi không xác định.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      showNotification('error', `Đã xảy ra lỗi: ${errorMessage}`);
+      } finally {
+        setIsProcessing(false);
     }
   };
 

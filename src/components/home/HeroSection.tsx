@@ -29,9 +29,6 @@ export const HeroSection = () => {
               <Button as={Link} to="/shop" size="lg" rightIcon={<ArrowRightIcon className="w-5 h-5" />} className="bg-white text-indigo-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
                 Mua Ngay
               </Button>
-              <Button as={Link} to="/shop?filter=new" variant="outline" size="lg" className="border-2 border-white text-white hover:bg-white/10 backdrop-blur-sm">
-                Sản Phẩm Mới
-              </Button>
             </div>
             <div className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-white/20">
               <div>
