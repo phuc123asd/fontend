@@ -1,8 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+// Import useAuth để kiểm tra trạng thái đăng nhập
+import { useAuth } from '../contexts/AuthContext'; 
 import { Button } from '../components/ui/Button';
-import { TrashIcon, MinusIcon, PlusIcon, ShoppingBagIcon } from 'lucide-react';
+import { TrashIcon, MinusIcon, PlusIcon, ShoppingBagIcon, LogInIcon } from 'lucide-react'; // Thêm LogInIcon
+
 export const Cart = () => {
   const {
     cartItems,
@@ -10,6 +13,10 @@ export const Cart = () => {
     updateQuantity,
     cartTotal
   } = useCart();
+
+  // Lấy trạng thái xác thực từ AuthContext
+  const { isAuthenticated } = useAuth();
+
   if (cartItems.length === 0) {
     return <div className="min-h-screen bg-white dark:bg-gray-900 py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,6 +35,7 @@ export const Cart = () => {
         </div>
       </div>;
   }
+
   return <div className="min-h-screen bg-white dark:bg-gray-900 py-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
@@ -95,9 +103,24 @@ export const Cart = () => {
                   </div>
                 </div>
               </div>
-              <Button as={Link} to="/checkout" className="w-full mb-4">
-                Tiến hành thanh toán
-              </Button>
+
+              {/* --- PHẦN THÊM VÀO ĐỂ KIỂM TRA ĐĂNG NHẬP --- */}
+              {isAuthenticated ? (
+                <Button as={Link} to="/checkout" className="w-full mb-4">
+                  Tiến hành thanh toán
+                </Button>
+              ) : (
+                <div className="mb-4 p-4 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-600 rounded-lg text-center">
+                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                    Bạn cần đăng nhập để thanh toán.
+                  </p>
+                  <Button as={Link} to="/login" variant="outline" className="w-full">
+                    <LogInIcon className="w-4 h-4 mr-2" />
+                    Đăng nhập / Đăng ký
+                  </Button>
+                </div>
+              )}
+
               <Button as={Link} to="/shop" variant="outline" className="w-full">
                 Tiếp tục mua sắm
               </Button>

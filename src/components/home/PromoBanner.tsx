@@ -20,14 +20,6 @@ export const PromoBanner = () => {
                 Giảm giá lên đến 50% cho các sản phẩm công nghệ cao cấp. Ưu đãi có hiệu lực
                 đến ngày 30 tháng 11.
               </p>
-              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-                <Button as={Link} to="/shop/deals" size="lg" className="bg-indigo-600 hover:bg-indigo-700">
-                  Mua Ngay
-                </Button>
-                <Button as={Link} to="/shop" variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
-                  Xem Tất Cả
-                </Button>
-              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
