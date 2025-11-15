@@ -47,7 +47,7 @@ export const Checkout = () => {
     accountNumber: "104879691506", // Số tài khoản
     bankName: "Vietinbank", // Tên ngân hàng
     branch: "HCM", // Chi nhánh
-    qrCodeImage: "../../img/1.jpg" // Đường dẫn đến hình ảnh QR code của bạn
+    qrCodeImage: "https://res.cloudinary.com/dze6buir3/image/upload/v1763204147/x2nrgf58xndhcfjpxj9w.jpg" // Đường dẫn đến hình ảnh QR code của bạn
   };
 
   // useEffect được đơn giản hóa, chỉ còn nhiệm vụ điền form
