@@ -7,7 +7,7 @@ interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  isError?: boolean; // Thêm cờ để nhận diện tin nhắn lỗi
+  isError?: boolean;
 }
 
 interface QuickAction {
@@ -200,11 +200,13 @@ export const Chatbot = () => {
     setIsTyping(true);
 
     try {
-      // !!! QUAN TRỌNG: Vẫn cần cấu hình CORS trên server backend !!!
       const response = await fetch(`${import.meta.env.VITE_API_URL}/chatbot/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: text.trim() }),
+        body: JSON.stringify(
+          { question: text.trim(), 
+            role: 'user'
+          }),
       });
 
       if (!response.ok) throw new Error('Network response was not ok');
@@ -247,7 +249,7 @@ export const Chatbot = () => {
     // Có thể thêm thông báo "Đã sao chép!" ở đây
   };
 
-  const clearChat = () => { // <<<< DÒNG ĐÃ ĐƯỢC SỬA
+  const clearChat = () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử trò chuyện?')) {
       setMessages([initialBotMessage]);
       localStorage.removeItem('chatMessages');
@@ -272,7 +274,6 @@ export const Chatbot = () => {
       )}
 
       {isOpen && (
-        // CẢI TIẾN: Tối ưu responsive, full width trên mobile
         <div className="fixed bottom-0 right-0 z-50 w-full h-full sm:w-96 sm:h-[600px] sm:bottom-6 sm:right-6 bg-white dark:bg-gray-800 rounded-lg sm:rounded-lg shadow-2xl flex flex-col">
           
           <ChatHeader onClear={clearChat} onClose={() => setIsOpen(false)} />
