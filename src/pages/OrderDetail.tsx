@@ -31,6 +31,9 @@ export const OrderDetail = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updating, setUpdating] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   // Hàm lấy thông tin đơn hàng từ API
   const fetchOrder = async () => {
@@ -64,6 +67,42 @@ export const OrderDetail = () => {
     }
   };
 
+  // Hàm cập nhật trạng thái đơn hàng
+  const updateOrderStatus = async () => {
+    if (!orderId) return;
+    
+    setUpdating(true);
+    setUpdateError(null);
+    setUpdateSuccess(false);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/order/${orderId}/status/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          status: 'Đã Giao'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Lỗi ${response.status}: ${response.statusText}`);
+      }
+
+      // Cập nhật thành công
+      setUpdateSuccess(true);
+      // Tải lại thông tin đơn hàng để cập nhật trạng thái
+      fetchOrder();
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      setUpdateError((err as Error).message || 'Không thể cập nhật trạng thái đơn hàng');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   // Tải lại thông tin đơn hàng
   const handleRefresh = () => {
     fetchOrder();
@@ -76,7 +115,12 @@ export const OrderDetail = () => {
 
   // Hàm xác định màu sắc cho trạng thái đơn hàng
   const getStatusClass = (status: string) => {
-    return 'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200';
+    switch (status) {
+      case 'Đang Xử Lý': return 'bg-amber-100 text-amber-800 border border-amber-300';
+      case 'Đang Vận Chuyển': return 'bg-violet-100 text-violet-800 border border-violet-300';
+      case 'Đã Giao': return 'bg-emerald-100 text-emerald-800 border border-emerald-300';
+      default: return 'bg-gray-100 text-gray-800 border border-gray-300';
+    }
   };
 
   // Hiển thị trạng thái tải
@@ -155,6 +199,29 @@ export const OrderDetail = () => {
           </div>
         </div>
 
+        {/* Update Status Success/Error Messages */}
+        {updateSuccess && (
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
+              <p className="text-green-800 dark:text-green-200">
+                Trạng thái đơn hàng đã được cập nhật thành công!
+              </p>
+            </div>
+          </div>
+        )}
+
+        {updateError && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <AlertCircleIcon className="w-5 h-5 text-red-600 dark:text-red-400 mr-2" />
+              <p className="text-red-800 dark:text-red-200">
+                {updateError}
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Order Details */}
           <div className="lg:col-span-2 space-y-6">
@@ -197,6 +264,32 @@ export const OrderDetail = () => {
                   </p>
                 </div>
               </div>
+              
+              {/* Nút Đã Nhận Đơn Hàng - chỉ hiển thị khi trạng thái là "Đang Vận Chuyển" */}
+              {order.status === 'Đang Vận Chuyển' && (
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <Button
+                    onClick={updateOrderStatus}
+                    disabled={updating}
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {updating ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Đang cập nhật...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircleIcon className="w-5 h-5" />
+                        Đã Nhận Đơn Hàng
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    Nhấn vào đây nếu bạn đã nhận được đơn hàng
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Order Items */}

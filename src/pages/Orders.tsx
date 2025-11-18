@@ -64,7 +64,12 @@ export const Orders = () => {
 
   // Hàm xác định màu sắc cho trạng thái đơn hàng
   const getStatusClass = (status: string) => {
-    return 'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200';
+    switch (status) {
+      case 'Đang Xử Lý': return 'bg-amber-100 text-amber-800 border border-amber-300';
+      case 'Đang Vận Chuyển': return 'bg-violet-100 text-violet-800 border border-violet-300';
+      case 'Đã Giao': return 'bg-emerald-100 text-emerald-800 border border-emerald-300';
+      default: return 'bg-gray-100 text-gray-800 border border-gray-300';
+    }
   };
 
   if (loading) {
