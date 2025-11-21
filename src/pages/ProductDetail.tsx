@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useReviews } from '../contexts/ReviewContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
-import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   StarIcon,
   TruckIcon,
   ShieldCheckIcon,
   RotateCcwIcon,
-  ThumbsUpIcon,
   EditIcon,
-  TrashIcon,
   AlertCircleIcon,
   CheckCircleIcon,
+  BotIcon,
+  MessageCircleIcon,
 } from 'lucide-react';
 
 // Kiểu dữ liệu từ API
@@ -43,7 +41,7 @@ interface ApiProduct {
   };
 }
 
-// Kiểu review từ API
+// Kiểu review từ API (không còn admin_response)
 interface ApiReview {
   id: string;
   product_id: string;
@@ -52,27 +50,51 @@ interface ApiReview {
   comment: string;
   created_at: string;
   updated_at: string;
-  user_name?: string; // Thêm trường user_name từ API mới
-  user_avatar?: string; // Thêm trường user_avatar từ API mới
+  user_name?: string;
+  user_avatar?: string;
 }
 
-// Kiểu review nội bộ dùng vào UI
+// Kiểu phản hồi admin từ API
+interface ApiAdminResponse {
+  id: string;
+  review_id: string;
+  response: string;
+  admin_id: string;
+  admin_name: string;
+  created_at: string;
+  updated_at: string;
+  response_type: 'manual' | 'ai';
+}
+
+// Kiểu review nội bộ dùng vào UI (không còn adminResponse)
 interface UiReview {
   id: string | number;
-  productId: string; // api id or numeric string
+  productId: string;
   userId: string;
   userName: string;
   userAvatar?: string;
   rating: number;
   comment: string;
-  date: string; // ISO string
+  date: string;
   helpful?: number;
+}
+
+// Kiểu phản hồi admin nội bộ dùng vào UI
+interface UiAdminResponse {
+  id: string;
+  reviewId: string;
+  response: string;
+  adminId: string;
+  adminName: string;
+  createdAt: string;
+  updatedAt: string;
+  responseType: 'manual' | 'ai';
 }
 
 // Kiểu dữ liệu chuẩn hóa dùng trong app
 interface Product {
   id: number;
-  apiId?: string; // giữ id gốc từ API (chuỗi ObjectId nếu có)
+  apiId?: string;
   name: string;
   price: number;
   originalPrice: number;
@@ -167,7 +189,7 @@ function normalizeProduct(apiData: ApiProduct): Product {
   return {
     ...defaultProduct,
     id: Number(apiData.id) || defaultProduct.id,
-    apiId: apiData.id, // giữ nguyên id chuỗi nếu API trả ObjectId
+    apiId: apiData.id,
     name: apiData.name || defaultProduct.name,
     price: Number(apiData.price) || defaultProduct.price,
     originalPrice: Number(apiData.originalPrice) || defaultProduct.originalPrice,
@@ -188,7 +210,7 @@ function normalizeProduct(apiData: ApiProduct): Product {
   };
 }
 
-// Hàm chuyển đổi từ API review sang UI review
+// Hàm chuyển đổi từ API review sang UI review (không còn adminResponse)
 function normalizeApiReview(apiReview: ApiReview): UiReview {
   // Nếu API đã trả về user_name và user_avatar, sử dụng chúng
   if (apiReview.user_name && apiReview.user_avatar) {
@@ -219,7 +241,7 @@ function normalizeApiReview(apiReview: ApiReview): UiReview {
   return {
     id: apiReview.id,
     productId: apiReview.product_id,
-    userId: userEmail, // Sử dụng email làm ID
+    userId: userEmail,
     userName,
     userAvatar,
     rating: apiReview.rating,
@@ -229,14 +251,26 @@ function normalizeApiReview(apiReview: ApiReview): UiReview {
   };
 }
 
+// Hàm chuyển đổi từ API admin response sang UI admin response
+function normalizeApiAdminResponse(apiResponse: ApiAdminResponse): UiAdminResponse {
+  return {
+    id: apiResponse.id,
+    reviewId: apiResponse.review_id,
+    response: apiResponse.response,
+    adminId: apiResponse.admin_id,
+    adminName: apiResponse.admin_name,
+    createdAt: apiResponse.created_at,
+    updatedAt: apiResponse.updated_at,
+    responseType: apiResponse.response_type,
+  };
+}
+
 export const ProductDetail: React.FC = () => {
   const params = useParams<{ id: string }>();
-  const paramId = params.id || '1'; // giữ nguyên chuỗi id từ URL (có thể là ObjectId)
-  // productIdNumeric vẫn được dùng cho các context cũ (nếu cần)
+  const paramId = params.id || '1';
   const productIdNumeric = parseInt(paramId || '1', 10);
 
   const [selectedImage, setSelectedImage] = useState(0);
-  const [quantity, setQuantity] = useState(1);
   const [newReviewRating, setNewReviewRating] = useState(5);
   const [newReviewComment, setNewReviewComment] = useState('');
   const [editingReviewId, setEditingReviewId] = useState<string | number | null>(null);
@@ -254,20 +288,19 @@ export const ProductDetail: React.FC = () => {
     show: boolean;
   }>({ type: 'success', message: '', show: false });
 
-  const { addToWishlist, isInWishlist, removeFromWishlist } = useWishlist();
-  // We'll still use getProductReviews from context as initial source (fallback)
+  // State để quản lý phản hồi admin (đơn giản hơn)
+  const [adminResponses, setAdminResponses] = useState<Record<string, UiAdminResponse[]>>({});
+  const [showAdminResponse, setShowAdminResponse] = useState<Record<string, boolean>>({});
+
+  // Loại bỏ isInWishlist vì không sử dụng
   const { getProductReviews } = useReviews();
   const { isAuthenticated, user } = useAuth();
 
   const [product, setProduct] = useState<Product>(defaultProduct);
-
-  // Local reviews state used by UI (initially from context fallback)
   const [reviews, setReviews] = useState<UiReview[]>([]);
 
-  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; message: string; onConfirm: () => void } | null>(null);
-
   // Hàm tải reviews từ API
-  const fetchReviews = async (productId: string) => {
+  const fetchReviews = useCallback(async (productId: string) => {
     setReviewsLoading(true);
     setReviewsError(null);
     
@@ -284,6 +317,11 @@ export const ProductDetail: React.FC = () => {
       const normalizedReviews = apiReviews.map(normalizeApiReview);
       
       setReviews(normalizedReviews);
+      
+      // Tải phản hồi admin cho mỗi review
+      normalizedReviews.forEach(review => {
+        fetchAdminResponses(String(review.id));
+      });
     } catch (err) {
       console.error('Fetch reviews error:', err);
       setReviewsError(`Không thể tải đánh giá: ${(err as Error).message}`);
@@ -291,17 +329,20 @@ export const ProductDetail: React.FC = () => {
       // Fallback to context if API fails
       try {
         const ctxReviews = getProductReviews ? getProductReviews(productIdNumeric) : [];
-        const normalized: UiReview[] = (ctxReviews || []).map((r: any) => ({
-          id: r.id ?? r._id ?? Math.random().toString(36).slice(2),
-          productId: r.productId ?? String(paramId),
-          userId: r.userId ?? r.customer_id ?? (r.customerId ?? 'unknown'),
-          userName: r.userName ?? r.customer_name ?? 'Người dùng',
-          userAvatar: r.userAvatar ?? r.avatar ?? undefined,
-          rating: r.rating ?? 5,
-          comment: r.comment ?? '',
-          date: r.date ?? r.created_at ?? new Date().toISOString(),
-          helpful: r.helpful ?? r.helpful_count ?? 0,
-        }));
+        const normalized: UiReview[] = (ctxReviews || []).map((r: unknown) => {
+          const review = r as Record<string, unknown>;
+          return {
+            id: (review.id as string | number) ?? (review._id as string | number) ?? Math.random().toString(36).slice(2),
+            productId: (review.productId as string) ?? String(paramId),
+            userId: (review.userId as string) ?? (review.customer_id as string) ?? ((review.customerId as string) ?? 'unknown'),
+            userName: (review.userName as string) ?? (review.customer_name as string) ?? 'Người dùng',
+            userAvatar: (review.userAvatar as string) ?? (review.avatar as string | undefined),
+            rating: (review.rating as number) ?? 5,
+            comment: (review.comment as string) ?? '',
+            date: (review.date as string) ?? (review.created_at as string) ?? new Date().toISOString(),
+            helpful: (review.helpful as number) ?? (review.helpful_count as number) ?? 0,
+          };
+        });
         setReviews(normalized);
       } catch (ctxErr) {
         console.warn('getProductReviews fallback error', ctxErr);
@@ -309,6 +350,29 @@ export const ProductDetail: React.FC = () => {
       }
     } finally {
       setReviewsLoading(false);
+    }
+  }, [getProductReviews, productIdNumeric, paramId]);
+
+  // Hàm tải phản hồi admin cho một review cụ thể
+  const fetchAdminResponses = async (reviewId: string) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/review/${reviewId}/responses/`);      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const apiResponses: ApiAdminResponse[] = await response.json();
+      
+      // Chuyển đổi dữ liệu từ API sang định dạng UI
+      const normalizedResponses = apiResponses.map(normalizeApiAdminResponse);
+      
+      setAdminResponses(prev => ({
+        ...prev,
+        [reviewId]: normalizedResponses
+      }));
+    } catch (err) {
+      console.error('Fetch admin responses error:', err);
+      // Không hiển thị lỗi cho người dùng, chỉ log ra console
     }
   };
 
@@ -318,6 +382,14 @@ export const ProductDetail: React.FC = () => {
     setTimeout(() => {
       setNotification(prev => ({ ...prev, show: false }));
     }, 3000);
+  };
+
+  // Hàm xử lý việc hiển thị/ẩn phản hồi admin
+  const toggleAdminResponse = (reviewId: string) => {
+    setShowAdminResponse(prev => ({
+      ...prev,
+      [reviewId]: !prev[reviewId]
+    }));
   };
 
   useEffect(() => {
@@ -351,24 +423,27 @@ export const ProductDetail: React.FC = () => {
     };
 
     fetchProduct();
-  }, [paramId, productIdNumeric]);
+  }, [paramId, productIdNumeric, fetchReviews]);
 
   // Fallback: Nếu không có reviews từ API, thử lấy từ context
   useEffect(() => {
     if (reviews.length === 0 && !reviewsLoading && !reviewsError) {
       try {
         const ctxReviews = getProductReviews ? getProductReviews(productIdNumeric) : [];
-        const normalized: UiReview[] = (ctxReviews || []).map((r: any) => ({
-          id: r.id ?? r._id ?? Math.random().toString(36).slice(2),
-          productId: r.productId ?? String(paramId),
-          userId: r.userId ?? r.customer_id ?? (r.customerId ?? 'unknown'),
-          userName: r.userName ?? r.customer_name ?? 'Người dùng',
-          userAvatar: r.userAvatar ?? r.avatar ?? undefined,
-          rating: r.rating ?? 5,
-          comment: r.comment ?? '',
-          date: r.date ?? r.created_at ?? new Date().toISOString(),
-          helpful: r.helpful ?? r.helpful_count ?? 0,
-        }));
+        const normalized: UiReview[] = (ctxReviews || []).map((r: unknown) => {
+          const review = r as Record<string, unknown>;
+          return {
+            id: (review.id as string | number) ?? (review._id as string | number) ?? Math.random().toString(36).slice(2),
+            productId: (review.productId as string) ?? String(paramId),
+            userId: (review.userId as string) ?? (review.customer_id as string) ?? ((review.customerId as string) ?? 'unknown'),
+            userName: (review.userName as string) ?? (review.customer_name as string) ?? 'Người dùng',
+            userAvatar: (review.userAvatar as string) ?? (review.avatar as string | undefined),
+            rating: (review.rating as number) ?? 5,
+            comment: (review.comment as string) ?? '',
+            date: (review.date as string) ?? (review.created_at as string) ?? new Date().toISOString(),
+            helpful: (review.helpful as number) ?? (review.helpful_count as number) ?? 0,
+          };
+        });
         setReviews(normalized);
       } catch (err) {
         console.warn('getProductReviews fallback error', err);
@@ -376,8 +451,6 @@ export const ProductDetail: React.FC = () => {
       }
     }
   }, [getProductReviews, productIdNumeric, paramId, reviews.length, reviewsLoading, reviewsError]);
-
-  const inWishlist = isInWishlist(productIdNumeric);
 
   // Sort reviews according to sortBy
   const sortedReviews = [...reviews].sort((a, b) => {
@@ -437,7 +510,7 @@ export const ProductDetail: React.FC = () => {
       const productApiId = product.apiId ?? paramId ?? String(product.id);
       
       // Sử dụng ID người dùng từ AuthContext
-      const customerId = user.id; // Đây là cách lấy ID người dùng
+      const customerId = user.id;
       
       // Tạo body theo định dạng API mới yêu cầu
       const body = {
@@ -461,8 +534,6 @@ export const ProductDetail: React.FC = () => {
         throw new Error(`Lỗi server: ${resp.status} ${errorText}`);
       }
 
-      const result = await resp.json();
-      
       // Tải lại danh sách reviews từ API để có dữ liệu mới nhất
       if (product.apiId) {
         await fetchReviews(product.apiId);
@@ -504,8 +575,6 @@ export const ProductDetail: React.FC = () => {
     showNotification('success', 'Đã cập nhật đánh giá!');
   };
 
-    // --- CẬP NHẬT: Hàm xóa review bằng cách gọi API ---
-  
   // Loading và Error UI
   if (loading) {
     return (
@@ -617,7 +686,6 @@ export const ProductDetail: React.FC = () => {
                 <span className="text-4xl font-bold text-gray-900 dark:text-white">${product.price}</span>
                 {product.originalPrice > 0 && <span className="text-2xl text-gray-500 line-through">${product.originalPrice}</span>}
               </div>
-              {/* <p className="text-green-600 dark:text-green-400 mt-2">{product.inStock ? `Còn ${product.stock} sản phẩm` : 'Hết hàng'}</p> */}
             </div>
 
             <p className="text-gray-600 dark:text-gray-400 mb-6">{product.description}</p>
@@ -767,7 +835,7 @@ export const ProductDetail: React.FC = () => {
                   <label className="text-sm text-gray-600 dark:text-gray-400">Sắp xếp:</label>
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
+                    onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'highest' | 'lowest' | 'helpful')}
                     className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="newest">Mới nhất</option>
@@ -874,11 +942,61 @@ export const ProductDetail: React.FC = () => {
                             </div>
                             {user && String(user.id) === String(review.userId) && (
                               <div className="flex gap-2 ml-4">
+                                <button
+                                  onClick={() => handleEditReview(review.id, review.comment, review.rating)}
+                                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                >
+                                  <EditIcon className="w-4 h-4" />
+                                </button>
                               </div>
                             )}
                           </div>
                         </div>
                         <p className="text-gray-600 dark:text-gray-400 mb-3">{review.comment}</p>
+                        
+                        {/* Nút xem phản hồi admin */}
+                        {adminResponses[String(review.id)] && adminResponses[String(review.id)].length > 0 && (
+                          <button
+                            onClick={() => toggleAdminResponse(String(review.id))}
+                            className="flex items-center gap-1 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 mb-2"
+                          >
+                            <MessageCircleIcon className="w-4 h-4" />
+                            {showAdminResponse[String(review.id)] ? 'Ẩn phản hồi từ cửa hàng' : `Xem ${adminResponses[String(review.id)].length} phản hồi từ cửa hàng`}
+                          </button>
+                        )}
+                        
+                        {/* Phản hồi admin từ cửa hàng */}
+                        {showAdminResponse[String(review.id)] && adminResponses[String(review.id)] && (
+                          <div className="space-y-3">
+                            {adminResponses[String(review.id)].map((response) => (
+                              <div key={response.id} className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-shrink-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
+                                    {response.responseType === 'ai' ? (
+                                      <BotIcon className="w-4 h-4 text-white" />
+                                    ) : (
+                                      <div className="w-4 h-4 bg-white rounded-full"></div>
+                                    )}
+                                  </div>
+                                  <div className="flex-grow">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <h5 className="font-medium text-indigo-900 dark:text-indigo-200">{response.adminName}</h5>
+                                      <span className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/40 px-2 py-0.5 rounded-full">
+                                        {response.responseType === 'ai' ? 'AI Assistant' : 'Admin'}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm text-indigo-800 dark:text-indigo-300 whitespace-pre-line">
+                                      {response.response}
+                                    </p>
+                                    <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-2">
+                                      {new Date(response.createdAt).toLocaleDateString()} - Phản hồi được tạo bởi {response.responseType === 'ai' ? 'AI' : 'admin'}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
