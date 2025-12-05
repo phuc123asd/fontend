@@ -34,21 +34,25 @@ export const About = () => {
     description: 'Tham gia cùng hàng nghìn người đam mê công nghệ tin tưởng TechHub.'
   }];
   const team = [{
-    name: 'Sarah Johnson',
-    role: 'Giám Đốc Điều Hành & Nhà Sáng Lập',
-    image: 'https://randomuser.me/api/portraits/women/1.jpg'
+    name: 'Võ Lê Hoàng Phúc',
+    role: 'Giữ xe',
+    image: 'https://res.cloudinary.com/dze6buir3/image/upload/v1764913300/yfakrgyepotww2whowig.jpg'
   }, {
-    name: 'Michael Chen',
-    role: 'Giám Đốc Công Nghệ',
-    image: 'https://randomuser.me/api/portraits/men/2.jpg'
+    name: 'Nguyễn Hoàng Việt',
+    role: 'Oxin',
+    image: 'https://res.cloudinary.com/dze6buir3/image/upload/v1764913228/dbqcov6fgtn5jdof6v3f.jpg'
   }, {
-    name: 'Emily Rodriguez',
-    role: 'Trưởng Phòng Thành Công Khách Hàng',
-    image: 'https://randomuser.me/api/portraits/women/3.jpg'
+    name: 'Nguyễn Lê Nam Hải',
+    role: 'Đội Trưởng Lao Công',
+    image: 'https://res.cloudinary.com/dze6buir3/image/upload/v1764913110/cr1o7psyygbiguplw8xk.jpg'
   }, {
-    name: 'David Kim',
-    role: 'Quản Lý Sản Phẩm',
-    image: 'https://randomuser.me/api/portraits/men/4.jpg'
+    name: 'Đỗ Nhật Trường',
+    role: 'Lao Công',
+    image: 'https://res.cloudinary.com/dze6buir3/image/upload/v1764913039/tzhemhaiizqhwkrmwezm.jpg'
+  }, {
+    name: 'Phạm Thế Anh',
+    role: 'Bảo Vệ',
+    image: 'https://res.cloudinary.com/dze6buir3/image/upload/v1764913348/gg0vvaanzrphapgp72mm.jpg'
   }];
   return <div className="bg-white dark:bg-gray-900">
       {/* Hero Section */}
