@@ -71,7 +71,7 @@ export const Shop = () => {
 
   // Fetch categories from API
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/categories/')
+    fetch(`${import.meta.env.VITE_API_URL}/categories/`)
       .then(res => res.json())
       .then((data: Category[]) => {
         const categoryNames = data.map(cat => cat.name);
@@ -86,7 +86,7 @@ export const Shop = () => {
 
   // Fetch brands from API
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/brand/')
+    fetch(`${import.meta.env.VITE_API_URL}/brand/`)
       .then(res => res.json())
       .then((data: Brand[]) => {
         const brandNames = data.map(brand => brand.name);
