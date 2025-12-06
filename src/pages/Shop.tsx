@@ -17,22 +17,19 @@ interface Product {
   isNew?: boolean;
 }
 
-// Sample product data - same as in FeaturedProducts
-const categoryMapping: Record<string, string> = {
-  'Điện Thoại': 'Smartphones',
-  'Laptop': 'Laptops',
-  'Đồng Hồ Thông Minh': 'Smartwatches',
-  'Âm Thanh': 'Audio',
-  'Máy Tính Bảng': 'Tablets',
-  'Game': 'Gaming',
-  'Phụ Kiện': 'Accessories',
-  'Flycam': 'Drones'
-};
+interface Category {
+  id: string;
+  name: string;
+}
 
+interface Brand {
+  id: string;
+  name: string;
+}
+
+// Sample product data - same as in FeaturedProducts
 const defaultProducts: Product[] = [];
 
-const categories = ['Tất Cả', 'Điện Thoại', 'Laptop', 'Đồng Hồ Thông Minh', 'Âm Thanh', 'Máy Tính Bảng', 'Game', 'Phụ Kiện', 'Flycam'];
-const brands = ['Tất Cả', 'Apple', 'Samsung', 'Sony', 'Google', 'Dell', 'Nintendo', 'DJI', 'Logitech'];
 const sortOptions = ['Nổi Bật', 'Giá: Thấp đến Cao', 'Giá: Cao đến Thấp', 'Mới Nhất', 'Đánh Giá Cao'];
 
 export const Shop = () => {
@@ -44,6 +41,9 @@ export const Shop = () => {
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>(defaultProducts);
+  const [categories, setCategories] = useState<string[]>(['Tất Cả']);
+  const [brands, setBrands] = useState<string[]>(['Tất Cả']);
+  const [loading, setLoading] = useState(true);
 
   // State phân trang
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,22 +51,50 @@ export const Shop = () => {
 
   // Fetch từ API và ép kiểu
   useEffect(() => {
-  fetch(`${import.meta.env.VITE_API_URL}/products/`)
-    .then(res => res.json())
-    .then(data => {
-      const apiProducts = data.data || data;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const formattedProducts = apiProducts.map((product: any) => ({
-        ...product,
-        price: Number(product.price),
-        originalPrice: Number(product.originalPrice),
-        rating: Number(product.rating)
-      }));
-      setProducts(formattedProducts);
-    })
-    .catch(err => {
-      console.error('Lỗi load API, dùng data cứng:', err);
-    });
+    fetch(`${import.meta.env.VITE_API_URL}/products/`)
+      .then(res => res.json())
+      .then(data => {
+        const apiProducts = data.data || data;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const formattedProducts = apiProducts.map((product: any) => ({
+          ...product,
+          price: Number(product.price),
+          originalPrice: Number(product.originalPrice),
+          rating: Number(product.rating)
+        }));
+        setProducts(formattedProducts);
+      })
+      .catch(err => {
+        console.error('Lỗi load API, dùng data cứng:', err);
+      });
+  }, []);
+
+  // Fetch categories from API
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/categories/')
+      .then(res => res.json())
+      .then((data: Category[]) => {
+        const categoryNames = data.map(cat => cat.name);
+        setCategories(['Tất Cả', ...categoryNames]);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Lỗi khi tải categories:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  // Fetch brands from API
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/brand/')
+      .then(res => res.json())
+      .then((data: Brand[]) => {
+        const brandNames = data.map(brand => brand.name);
+        setBrands(['Tất Cả', ...brandNames]);
+      })
+      .catch(err => {
+        console.error('Lỗi khi tải brands:', err);
+      });
   }, []);
   
   useEffect(() => {
@@ -74,7 +102,7 @@ export const Shop = () => {
     if (categoryParam && categories.includes(categoryParam)) {
       setSelectedCategory(categoryParam);
     }
-  }, [searchParams]);
+  }, [searchParams, categories]);
 
   // Reset về trang 1 khi filter thay đổi
   useEffect(() => {
@@ -83,22 +111,19 @@ export const Shop = () => {
 
   const filteredProducts = products
     .filter(product => {
-    // Lọc theo category
-    if (selectedCategory === 'Tất Cả') return true;
-
-    const englishCategory =
-      categoryMapping[selectedCategory] ?? selectedCategory; // fallback
-    return product.category === englishCategory;
-  })
-  .filter(product => {
-    // Lọc theo brand
-    if (selectedBrand === 'Tất Cả') return true;
-    return product.brand === selectedBrand;
-  })
-  .filter(product => {
-    // Lọc theo giá
-    return product.price >= priceRange[0] && product.price <= priceRange[1];
-  });
+      // Lọc theo category
+      if (selectedCategory === 'Tất Cả') return true;
+      return product.category === selectedCategory;
+    })
+    .filter(product => {
+      // Lọc theo brand
+      if (selectedBrand === 'Tất Cả') return true;
+      return product.brand === selectedBrand;
+    })
+    .filter(product => {
+      // Lọc theo giá
+      return product.price >= priceRange[0] && product.price <= priceRange[1];
+    });
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (selectedSort) {
@@ -130,7 +155,6 @@ export const Shop = () => {
   };
 
   // Hàm render pagination với ellipsis
-    // --- HÀM RENDER PAGINATION ĐÃ SỬA LỖI ---
   const renderPagination = () => {
     const paginationItems: (number | string)[] = [];
     const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
@@ -176,7 +200,7 @@ export const Shop = () => {
     }
 
     return (
-      <nav className="flex items-center justify-center space-x-1"> {/* Thay đổi gap thành space-x-1 để đồng bộ */}
+      <nav className="flex items-center justify-center space-x-1">
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
@@ -218,7 +242,8 @@ export const Shop = () => {
     );
   };
 
-  return <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-10">
@@ -229,12 +254,14 @@ export const Shop = () => {
             Khám phá bộ sưu tập sản phẩm công nghệ cao cấp
           </p>
         </div>
+        
         {/* Mobile Filter Button */}
         <div className="lg:hidden mb-4">
           <Button onClick={() => setIsMobileFilterOpen(true)} variant="outline" className="w-full" leftIcon={<FilterIcon className="w-4 h-4" />}>
             Lọc Sản Phẩm
           </Button>
         </div>
+        
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters - Desktop */}
           <div className="hidden lg:block w-64 flex-shrink-0">
@@ -244,42 +271,62 @@ export const Shop = () => {
                   <SlidersHorizontalIcon className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
                   Bộ Lọc
                 </h3>
-                <Button variant="ghost" size="sm" className="text-indigo-600 dark:text-indigo-400 p-0 h-auto hover:scale-100" onClick={() => {
-                setSelectedCategory('Tất Cả');
-                setSelectedBrand('Tất Cả');
-                setPriceRange([0, 2500]);
-              }}>
-                  Xóa tất cả bộ lọc
-                </Button>
               </div>
+              
               {/* Categories */}
               <div className="mb-6">
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
                   Danh Mục
                 </h4>
                 <div className="space-y-2">
-                  {categories.map(category => <div key={category} className="flex items-center">
-                      <input type="radio" id={`category-${category}`} name="category" className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer" checked={selectedCategory === category} onChange={() => setSelectedCategory(category)} />
-                      <label htmlFor={`category-${category}`} className="ml-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                  {categories.map(category => (
+                    <div key={category} className="flex items-center">
+                      <input 
+                        type="radio" 
+                        id={`category-${category}`} 
+                        name="category" 
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer" 
+                        checked={selectedCategory === category} 
+                        onChange={() => setSelectedCategory(category)} 
+                      />
+                      <label 
+                        htmlFor={`category-${category}`} 
+                        className="ml-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                      >
                         {category}
                       </label>
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
               </div>
+              
               {/* Brands */}
               <div className="mb-6">
                 <h4 className="font-medium text-gray-900 dark:text-white mb-3">
                   Thương Hiệu
                 </h4>
                 <div className="space-y-2">
-                  {brands.map(brand => <div key={brand} className="flex items-center">
-                      <input type="radio" id={`brand-${brand}`} name="brand" className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked={selectedBrand === brand} onChange={() => setSelectedBrand(brand)} />
-                      <label htmlFor={`brand-${brand}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  {brands.map(brand => (
+                    <div key={brand} className="flex items-center">
+                      <input 
+                        type="radio" 
+                        id={`brand-${brand}`} 
+                        name="brand" 
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" 
+                        checked={selectedBrand === brand} 
+                        onChange={() => setSelectedBrand(brand)} 
+                      />
+                      <label 
+                        htmlFor={`brand-${brand}`} 
+                        className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+                      >
                         {brand}
                       </label>
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
               </div>
+              
               {/* Price Range */}
               <div>
                 <h4 className="font-medium text-gray-900 dark:text-white mb-3">
@@ -294,13 +341,23 @@ export const Shop = () => {
                       ${priceRange[1]}
                     </span>
                   </div>
-                  <input type="range" min="0" max="2500" step="100" value={priceRange[1]} onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="2500" 
+                    step="100" 
+                    value={priceRange[1]} 
+                    onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])} 
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" 
+                  />
                 </div>
               </div>
             </div>
           </div>
+          
           {/* Mobile Filter Sidebar */}
-          {isMobileFilterOpen && <div className="fixed inset-0 z-50 lg:hidden">
+          {isMobileFilterOpen && (
+            <div className="fixed inset-0 z-50 lg:hidden">
               <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileFilterOpen(false)}></div>
               <div className="absolute right-0 top-0 bottom-0 w-80 bg-white dark:bg-gray-900 shadow-xl p-6 overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
@@ -311,41 +368,73 @@ export const Shop = () => {
                     <XIcon className="w-6 h-6" />
                   </button>
                 </div>
-                <Button variant="ghost" size="sm" className="text-indigo-600 dark:text-indigo-400 p-0 h-auto mb-6" onClick={() => {
-              setSelectedCategory('Tất Cả');
-              setSelectedBrand('Tất Cả');
-              setPriceRange([0, 2500]);
-            }}>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-indigo-600 dark:text-indigo-400 p-0 h-auto mb-6" 
+                  onClick={() => {
+                    setSelectedCategory('Tất Cả');
+                    setSelectedBrand('Tất Cả');
+                    setPriceRange([0, 2500]);
+                  }}
+                >
                   Xóa tất cả bộ lọc
                 </Button>
+                
                 {/* Categories */}
                 <div className="mb-6">
                   <h4 className="font-medium text-gray-900 dark:text-white mb-3">
                     Danh Mục
                   </h4>
                   <div className="space-y-2">
-                    {categories.map(category => <div key={category} className="flex items-center">
-                        <input type="radio" id={`mobile-category-${category}`} name="mobile-category" className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked={selectedCategory === category} onChange={() => setSelectedCategory(category)} />
-                        <label htmlFor={`mobile-category-${category}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    {categories.map(category => (
+                      <div key={category} className="flex items-center">
+                        <input 
+                          type="radio" 
+                          id={`mobile-category-${category}`} 
+                          name="mobile-category" 
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" 
+                          checked={selectedCategory === category} 
+                          onChange={() => setSelectedCategory(category)} 
+                        />
+                        <label 
+                          htmlFor={`mobile-category-${category}`} 
+                          className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+                        >
                           {category}
                         </label>
-                      </div>)}
+                      </div>
+                    ))}
                   </div>
                 </div>
+                
                 {/* Brands */}
                 <div className="mb-6">
                   <h4 className="font-medium text-gray-900 dark:text-white mb-3">
                     Thương Hiệu
                   </h4>
                   <div className="space-y-2">
-                    {brands.map(brand => <div key={brand} className="flex items-center">
-                        <input type="radio" id={`mobile-brand-${brand}`} name="mobile-brand" className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked={selectedBrand === brand} onChange={() => setSelectedBrand(brand)} />
-                        <label htmlFor={`mobile-brand-${brand}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    {brands.map(brand => (
+                      <div key={brand} className="flex items-center">
+                        <input 
+                          type="radio" 
+                          id={`mobile-brand-${brand}`} 
+                          name="mobile-brand" 
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" 
+                          checked={selectedBrand === brand} 
+                          onChange={() => setSelectedBrand(brand)} 
+                        />
+                        <label 
+                          htmlFor={`mobile-brand-${brand}`} 
+                          className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+                        >
                           {brand}
                         </label>
-                      </div>)}
+                      </div>
+                    ))}
                   </div>
                 </div>
+                
                 {/* Price Range */}
                 <div className="mb-6">
                   <h4 className="font-medium text-gray-900 dark:text-white mb-3">
@@ -360,14 +449,25 @@ export const Shop = () => {
                         ${priceRange[1]}
                       </span>
                     </div>
-                    <input type="range" min="0" max="2500" step="100" value={priceRange[1]} onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="2500" 
+                      step="100" 
+                      value={priceRange[1]} 
+                      onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])} 
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" 
+                    />
                   </div>
                 </div>
+                
                 <Button onClick={() => setIsMobileFilterOpen(false)} className="w-full">
                   Áp Dụng Bộ Lọc
                 </Button>
               </div>
-            </div>}
+            </div>
+          )}
+          
           {/* Product Grid */}
           <div className="flex-grow">
             {/* Sort & Results Count */}
@@ -378,19 +478,27 @@ export const Shop = () => {
                 kết quả
               </p>
               <div className="relative">
-                <select value={selectedSort} onChange={e => setSelectedSort(e.target.value)} className="appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg py-2 pl-4 pr-10 text-gray-700 dark:text-gray-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  {sortOptions.map(option => <option key={option} value={option}>
+                <select 
+                  value={selectedSort} 
+                  onChange={e => setSelectedSort(e.target.value)} 
+                  className="appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg py-2 pl-4 pr-10 text-gray-700 dark:text-gray-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  {sortOptions.map(option => (
+                    <option key={option} value={option}>
                       {option}
-                    </option>)}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDownIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
               </div>
             </div>
+            
             {/* Products */}
-            {sortedProducts.length > 0 ?
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sortedProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentProducts.map(product => <ProductCard key={product.id} {...product} />)}
-              </div> : 
+              </div>
+            ) : (
               <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
                 <div className="text-indigo-600 dark:text-indigo-400 mb-4">
                   <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -404,19 +512,24 @@ export const Shop = () => {
                   Thử điều chỉnh bộ lọc để tìm sản phẩm bạn muốn.
                 </p>
                 <Button onClick={() => {
-              setSelectedCategory('Tất Cả');
-              setSelectedBrand('Tất Cả');
-              setPriceRange([0, 2500]);
-            }}>
+                  setSelectedCategory('Tất Cả');
+                  setSelectedBrand('Tất Cả');
+                  setPriceRange([0, 2500]);
+                }}>
                   Xóa Bộ Lọc
                 </Button>
-              </div>}
+              </div>
+            )}
+            
             {/* Pagination */}
-            {sortedProducts.length > 0 && <div className="flex justify-center mt-12">
+            {sortedProducts.length > 0 && (
+              <div className="flex justify-center mt-12">
                 {renderPagination()}
-              </div>}
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
