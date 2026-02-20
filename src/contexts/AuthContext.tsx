@@ -41,6 +41,7 @@ interface Order {
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
+  googleLogin: (credential: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
@@ -124,6 +125,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const googleLogin = async (credential: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/customer/google-login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ credential }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data?.id) {
+        throw new Error(data?.error || 'Đăng nhập Google thất bại');
+      }
+
+      const basicUser: User = {
+        _id: data.id,
+        id: data.id,
+        email: data.email || '',
+        role: data.role === 'admin' ? 'admin' : 'customer',
+      };
+
+      setUser(basicUser);
+      await fetchUserInfoAfterLogin(data.id);
+    } catch (error) {
+      console.error('Google login error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const register = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -175,7 +209,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchUserInfoAfterLogin = async (userId: string) => {
     try {
       console.log('Fetching user info for:', userId);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/customer/get_customer/${userId}/`);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/customer/get_customer/${userId}/`,
+        { credentials: 'include' }
+      );
       
       if (!response.ok) {
         throw new Error('Failed to fetch user info');
@@ -190,11 +227,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Cập nhật thông tin người dùng với dữ liệu từ API
       setUser(prevUser => {
         if (!prevUser) return null;
-        
+
+        const resolvedEmail = data.email || prevUser.email || '';
+        const resolvedAvatar =
+          prevUser.avatar ||
+          (resolvedEmail
+            ? `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(resolvedEmail)}`
+            : undefined);
+
         return {
           ...prevUser,
           ...data,
           name: fullName || prevUser.name,
+          avatar: resolvedAvatar,
           state: data.province || prevUser.state, // Map province to state for backward compatibility
           zipCode: data.postal_code || prevUser.zipCode, // Map postal_code to zipCode for backward compatibility
         };
@@ -214,7 +259,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(true);
     try {
       console.log('Fetching user info for:', user._id);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/customer/get_customer/${user._id}/`);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/customer/get_customer/${user._id}/`,
+        { credentials: 'include' }
+      );
       
       if (!response.ok) {
         throw new Error('Failed to fetch user info');
@@ -229,11 +277,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Cập nhật thông tin người dùng với dữ liệu từ API
       setUser(prevUser => {
         if (!prevUser) return null;
-        
+
+        const resolvedEmail = data.email || prevUser.email || '';
+        const resolvedAvatar =
+          prevUser.avatar ||
+          (resolvedEmail
+            ? `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(resolvedEmail)}`
+            : undefined);
+
         return {
           ...prevUser,
           ...data,
           name: fullName || prevUser.name,
+          avatar: resolvedAvatar,
           state: data.province || prevUser.state, // Map province to state for backward compatibility
           zipCode: data.postal_code || prevUser.zipCode, // Map postal_code to zipCode for backward compatibility
         };
@@ -286,6 +342,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       value={{ 
         user, 
         login, 
+        googleLogin,
         register, 
         logout, 
         updateUser, 

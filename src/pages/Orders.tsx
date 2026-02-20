@@ -16,6 +16,7 @@ interface Order {
   items: OrderItem[];
   total_price: number;
   status: string;
+  payment_method?: 'cod' | 'momo' | 'qr';
   shipping_address: string;
   city: string;
   province: string;
@@ -69,6 +70,17 @@ export const Orders = () => {
       case 'Đang Vận Chuyển': return 'bg-violet-100 text-violet-800 border border-violet-300';
       case 'Đã Giao': return 'bg-emerald-100 text-emerald-800 border border-emerald-300';
       default: return 'bg-gray-100 text-gray-800 border border-gray-300';
+    }
+  };
+
+  const getPaymentMethodLabel = (method?: string) => {
+    switch (method) {
+      case 'momo':
+        return 'MoMo';
+      case 'qr':
+        return 'Chuyen khoan';
+      default:
+        return 'COD';
     }
   };
 
@@ -165,6 +177,7 @@ export const Orders = () => {
                     <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
                       <span>Ngày: {new Date(order.created_at).toLocaleDateString('vi-VN')}</span>
                       <span>{order.items.length} sản phẩm</span>
+                      <span>Thanh toán: {getPaymentMethodLabel(order.payment_method)}</span>
                       <span className="font-medium text-gray-900 dark:text-white">
                         ${order.total_price.toFixed(2)}
                       </span>

@@ -17,6 +17,8 @@ interface Order {
   items: OrderItem[];
   total_price: number;
   status: string;
+  payment_method?: 'cod' | 'momo' | 'qr';
+  payment_status?: 'pending' | 'paid' | 'failed';
   shipping_address: string;
   city: string;
   province: string;
@@ -120,6 +122,38 @@ export const OrderDetail = () => {
       case 'Đang Vận Chuyển': return 'bg-violet-100 text-violet-800 border border-violet-300';
       case 'Đã Giao': return 'bg-emerald-100 text-emerald-800 border border-emerald-300';
       default: return 'bg-gray-100 text-gray-800 border border-gray-300';
+    }
+  };
+
+  const getPaymentMethodLabel = (method?: string) => {
+    switch (method) {
+      case 'momo': return 'Ví MoMo';
+      case 'qr':   return 'Chuyển khoản';
+      default:     return 'Tiền mặt (COD)';
+    }
+  };
+
+  const getPaymentStatusBadge = (ps?: string) => {
+    switch (ps) {
+      case 'paid':    return <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">Đã thanh toán</span>;
+      case 'failed':  return <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Thất bại</span>;
+      default:        return <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Chưa thanh toán</span>;
+    }
+  };
+
+  const handleRetryMomo = async () => {
+    if (!order) return;
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/order/momo/create-payment/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: order.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Lỗi tạo MoMo');
+      window.location.href = data.payUrl;
+    } catch (err) {
+      alert((err as Error).message);
     }
   };
 
@@ -254,6 +288,25 @@ export const OrderDetail = () => {
                   <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(order.status)}`}>
                     {order.status}
                   </span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Thanh Toán
+                  </p>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    {getPaymentMethodLabel(order.payment_method)}
+                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    {getPaymentStatusBadge(order.payment_status)}
+                    {order.payment_method === 'momo' && order.payment_status !== 'paid' && (
+                      <button
+                        onClick={handleRetryMomo}
+                        className="text-xs underline text-indigo-600 dark:text-indigo-400 hover:no-underline"
+                      >
+                        Thanh toán ngay
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">

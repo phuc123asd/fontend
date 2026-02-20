@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
-import { LockIcon, CheckCircleIcon, QrCodeIcon, DollarSignIcon, SmartphoneIcon, AlertCircleIcon, CopyIcon } from 'lucide-react';
+import { LockIcon, CheckCircleIcon, DollarSignIcon, SmartphoneIcon, AlertCircleIcon } from 'lucide-react';
 
 export const Checkout = () => {
   const {
@@ -37,18 +37,7 @@ export const Checkout = () => {
   
   const [paymentInfo, setPaymentInfo] = useState({
     method: 'cod',
-    momoPhone: '',
-    qrCode: '' // Không cần thiết nữa nhưng giữ lại để tương thích
   });
-
-  // Thông tin tài khoản ngân hàng của bạn
-  const bankInfo = {
-    accountName: "VO LE HOANG PHUC", // Tên chủ tài khoản
-    accountNumber: "104879691506", // Số tài khoản
-    bankName: "Vietinbank", // Tên ngân hàng
-    branch: "HCM", // Chi nhánh
-    qrCodeImage: "https://res.cloudinary.com/dze6buir3/image/upload/v1763204147/x2nrgf58xndhcfjpxj9w.jpg" // Đường dẫn đến hình ảnh QR code của bạn
-  };
 
   // useEffect được đơn giản hóa, chỉ còn nhiệm vụ điền form
   useEffect(() => {
@@ -74,18 +63,6 @@ export const Checkout = () => {
     }, 3000);
   };
 
-  // Hàm sao chép thông tin tài khoản
-  const copyBankInfo = () => {
-    const info = `STK: ${bankInfo.accountName}\nSố tài khoản: ${bankInfo.accountNumber}\nNgân hàng: ${bankInfo.bankName}\nChi nhánh: ${bankInfo.branch}\nSố tiền: $${total.toFixed(2)}`;
-    
-    navigator.clipboard.writeText(info).then(() => {
-      showNotification('success', 'Đã sao chép thông tin tài khoản');
-    }).catch(err => {
-      console.error('Failed to copy:', err);
-      showNotification('error', 'Không thể sao chép thông tin');
-    });
-  };
-
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setStep(2);
@@ -105,6 +82,7 @@ export const Checkout = () => {
           quantity: item.quantity,
           price: item.price
         })),
+        payment_method: paymentInfo.method,
         shipping_address: shippingInfo.address,
         city: shippingInfo.city,
         province: shippingInfo.state,
@@ -123,8 +101,7 @@ export const Checkout = () => {
         throw new Error(errorData.error || JSON.stringify(errorData));
       }
       
-      const result = await response.json();
-      const order = result.order; // API trả về object order trực tiếp
+      const order = await response.json();
       
       // QUAN TRỌNG: Xóa giỏ hàng ngay sau khi đơn hàng được tạo thành công
       // Điều này ngăn người dùng tạo lại đơn hàng
@@ -132,19 +109,18 @@ export const Checkout = () => {
 
       // Xử lý theo từng phương thức thanh toán
       if (paymentInfo.method === 'momo') {
-        // Mô phỏng thanh toán MoMo
-        showNotification('success', 'Đang chuyển đến cổng thanh toán MoMo...');
-        setTimeout(() => {
-          // Trong thực tế, bạn sẽ chuyển đến URL thanh toán MoMo thực tế
-          // Hiện tại, chúng ta sẽ chuyển đến trang chi tiết đơn hàng
-          navigate(`/orders/${order.id}`);
-        }, 2000);
-
-      } else if (paymentInfo.method === 'qr') {
-        // Thanh toán chuyển khoản
-        showNotification('success', 'Đơn hàng đã tạo. Vui lòng xem thông tin chuyển khoản ở trang chi tiết đơn hàng.');
-        // Chuyển ngay đến trang chi tiết để xem thông tin chuyển khoản
-        navigate(`/orders/${order.id}`);
+        showNotification('success', 'Đang tạo liên kết thanh toán MoMo...');
+        const momoRes = await fetch(`${import.meta.env.VITE_API_URL}/order/momo/create-payment/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: order.id }),
+        });
+        const momoData = await momoRes.json();
+        if (!momoRes.ok) throw new Error(momoData.error || 'Không thể tạo thanh toán MoMo');
+        if (!momoData.payUrl) throw new Error('Không nhận được link thanh toán từ MoMo');
+        // Redirect sang trang thanh toán MoMo sandbox
+        window.location.href = momoData.payUrl;
+        return;
 
       } else {
         // Thanh toán khi nhận hàng (COD)
@@ -189,6 +165,7 @@ export const Checkout = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+
       {/* Notification */}
       {notification.show && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-2 ${
@@ -362,7 +339,7 @@ export const Checkout = () => {
                 </h2>
                 <form onSubmit={handlePaymentSubmit}>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Thanh toán khi nhận hàng */}
                       <div 
                         className={`border rounded-lg p-4 cursor-pointer transition-colors ${
@@ -409,89 +386,32 @@ export const Checkout = () => {
                         )}
                       </div>
 
-                      {/* Thanh toán qua QR Code */}
-                      <div 
-                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                          paymentInfo.method === 'qr' 
-                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' 
-                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-                        }`}
-                        onClick={() => setPaymentInfo({ ...paymentInfo, method: 'qr' })}
-                      >
-                        <div className="flex flex-col items-center">
-                          <QrCodeIcon className="w-8 h-8 text-indigo-600 mb-2" />
-                          <h3 className="font-medium text-gray-900 dark:text-white">Chuyển Khoản</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-1">
-                            Quét mã để thanh toán
-                          </p>
-                        </div>
-                        {paymentInfo.method === 'qr' && (
-                          <div className="mt-2 flex justify-center">
-                            <CheckCircleIcon className="w-5 h-5 text-indigo-600" />
-                          </div>
-                        )}
-                      </div>
                     </div>
 
                     {/* Hiển thị thông tin bổ sung theo từng phương thức */}
                     {paymentInfo.method === 'momo' && (
-                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Số điện thoại MoMo
-                        </label>
-                        <input 
-                          type="tel" 
-                          placeholder="Nhập số điện thoại đã đăng ký MoMo" 
-                          value={paymentInfo.momoPhone} 
-                          onChange={e => setPaymentInfo({
-                            ...paymentInfo,
-                            momoPhone: e.target.value
-                          })} 
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
-                        />
-                      </div>
-                    )}
-
-                    {paymentInfo.method === 'qr' && (
-                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <div className="text-center">
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
-                            Quét mã QR để thanh toán
-                          </p>
-                          
-                          {/* Hình ảnh QR Code cố định của bạn */}
-                          <img 
-                            src={bankInfo.qrCodeImage} 
-                            alt="Bank QR Code" 
-                            className="mx-auto w-48 h-48 object-contain mb-4 border-2 border-gray-200 rounded-lg"
-                          />
-                          
-                          {/* Thông tin tài khoản ngân hàng */}
-                          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4">
-                            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                              Thông tin chuyển khoản
-                            </h4>
-                            <div className="text-left space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                              <p><span className="font-medium">Ngân hàng:</span> {bankInfo.bankName}</p>
-                              <p><span className="font-medium">Chủ tài khoản:</span> {bankInfo.accountName}</p>
-                              <p><span className="font-medium">Số tài khoản:</span> {bankInfo.accountNumber}</p>
-                              <p><span className="font-medium">Chi nhánh:</span> {bankInfo.branch}</p>
-                              <p><span className="font-medium">Số tiền:</span> <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">${total.toFixed(2)}</span></p>
+                      <div className="mt-4 p-4 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <SmartphoneIcon className="w-5 h-5 text-pink-600 dark:text-pink-400 mt-0.5 shrink-0" />
+                          <div className="w-full">
+                            <p className="text-sm font-semibold text-pink-700 dark:text-pink-300 mb-2">
+                              Hướng dẫn thanh toán MoMo (Sandbox)
+                            </p>
+                            <p className="text-xs text-pink-600 dark:text-pink-400 mb-2">
+                              Chọn <strong>Ngân hàng</strong> trên trang MoMo, nhập thông tin thẻ test:
+                            </p>
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-xs font-mono space-y-1 text-gray-700 dark:text-gray-300">
+                              <div className="flex justify-between"><span className="text-gray-500">Số thẻ:</span> <strong>9704 0000 0000 0018</strong></div>
+                              <div className="flex justify-between"><span className="text-gray-500">Tên:</span> <strong>NGUYEN VAN A</strong></div>
+                              <div className="flex justify-between"><span className="text-gray-500">Ngày phát hành:</span> <strong>03/07</strong></div>
+                              <div className="flex justify-between"><span className="text-gray-500">OTP:</span> <strong>otp</strong></div>
                             </div>
                           </div>
-                          
-                          {/* Nút sao chép thông tin */}
-                          <button
-                            type="button"
-                            onClick={copyBankInfo}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
-                          >
-                            <CopyIcon className="w-4 h-4" />
-                            Sao chép thông tin
-                          </button>
                         </div>
                       </div>
                     )}
+
+
                   </div>
                   <div className="flex gap-4 mt-6">
                     <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1">

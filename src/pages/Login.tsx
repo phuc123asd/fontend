@@ -3,13 +3,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { MailIcon, LockIcon, AlertCircleIcon } from 'lucide-react';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -22,6 +25,29 @@ export const Login = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    try {
+      setIsLoading(true);
+      setError('');
+
+      if (!credentialResponse.credential) {
+        throw new Error('Thiếu Google credential');
+      }
+
+      await googleLogin(credentialResponse.credential);
+      
+      navigate('/');
+    } catch (err) {
+      setError('Đăng nhập Google thất bại. Vui lòng thử lại.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Đăng nhập Google thất bại');
   };
 
   return <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -76,6 +102,28 @@ export const Login = () => {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </Button>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                Hoặc đăng nhập với
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="outline"
+              size="large"
+              text="signin_with"
+              shape="rectangular"
+            />
           </div>
         </form>
       </div>
