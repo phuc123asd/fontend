@@ -79,9 +79,9 @@ export const Checkout = () => {
       const orderData = {
         customer: user?._id || user?.id,
         items: cartItems.map(item => ({
-          product: item.id,
+          product_id: item.id,
           quantity: item.quantity,
-          price: item.price
+          unit_price: item.price
         })),
         payment_method: paymentInfo.method,
         shipping_address: shippingInfo.address,
