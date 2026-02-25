@@ -11,6 +11,12 @@ interface OrderItem {
   price: number;
 }
 
+interface ProductPreview {
+  id: string;
+  name: string;
+  image: string;
+}
+
 // Interface cho dữ liệu đơn hàng từ API
 interface Order {
   id: string;
@@ -53,6 +59,7 @@ export const OrderDetail = () => {
   const [updating, setUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [productPreviewMap, setProductPreviewMap] = useState<Record<string, ProductPreview>>({});
 
   // Hàm lấy thông tin đơn hàng từ API
   const fetchOrder = async () => {
@@ -131,6 +138,43 @@ export const OrderDetail = () => {
   useEffect(() => {
     fetchOrder();
   }, [orderId]);
+
+  useEffect(() => {
+    const fetchProductPreviews = async () => {
+      if (!order || !order.items.length) return;
+
+      const productIds = Array.from(
+        new Set(order.items.map((item) => String(item.product)).filter(Boolean))
+      );
+      if (!productIds.length) return;
+
+      try {
+        const responses = await Promise.all(
+          productIds.map(async (productId) => {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/products/${productId}/`);
+            if (!response.ok) return null;
+            const data = await response.json();
+            return {
+              id: String(data.id || productId),
+              name: data.name || `Sản phẩm #${productId}`,
+              image: data.image || '',
+            } as ProductPreview;
+          })
+        );
+
+        const nextMap: Record<string, ProductPreview> = {};
+        responses.forEach((item) => {
+          if (!item) return;
+          nextMap[item.id] = item;
+        });
+        setProductPreviewMap(nextMap);
+      } catch (err) {
+        console.error('Error fetching product previews:', err);
+      }
+    };
+
+    fetchProductPreviews();
+  }, [order]);
 
   // Hàm xác định màu sắc cho trạng thái đơn hàng
   const getStatusClass = (status: string) => {
@@ -379,13 +423,22 @@ export const OrderDetail = () => {
               <div className="space-y-4">
                 {order.items.map((item, index) => (
                   <div key={index} className="flex gap-4">
-                    <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
-                      <PackageIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-                    </div>
+                    {productPreviewMap[item.product]?.image ? (
+                      <img
+                        src={productPreviewMap[item.product].image}
+                        alt={productPreviewMap[item.product].name}
+                        className="w-20 h-20 rounded object-cover border border-gray-200 dark:border-gray-700"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                        <PackageIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                      </div>
+                    )}
                     <div className="flex-grow">
                       <h4 className="font-medium text-gray-900 dark:text-white">
-                        {item.product}
+                        {productPreviewMap[item.product]?.name || `Sản phẩm #${item.product}`}
                       </h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">ID: {item.product}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         Số lượng: {item.quantity}
                       </p>
