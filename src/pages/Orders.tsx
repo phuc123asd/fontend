@@ -16,7 +16,7 @@ interface Order {
   items: OrderItem[];
   total_price: number;
   status: string;
-  payment_method?: 'cod' | 'momo' | 'qr';
+  payment_method?: 'cod' | 'momo' | 'vnpay';
   shipping_address: string;
   city: string;
   province: string;
@@ -77,8 +77,8 @@ export const Orders = () => {
     switch (method) {
       case 'momo':
         return 'MoMo';
-      case 'qr':
-        return 'Chuyen khoan';
+      case 'vnpay':
+        return 'VNPay';
       default:
         return 'COD';
     }

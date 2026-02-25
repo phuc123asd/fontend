@@ -1,7 +1,8 @@
+  // ...existing code...
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { CheckCircleIcon, TruckIcon, PackageIcon, MapPinIcon, AlertCircleIcon, RefreshCwIcon } from 'lucide-react';
+import { CheckCircleIcon, PackageIcon, MapPinIcon, AlertCircleIcon, RefreshCwIcon } from 'lucide-react';
 
 // Interface cho dữ liệu sản phẩm trong đơn hàng
 interface OrderItem {
@@ -17,7 +18,7 @@ interface Order {
   items: OrderItem[];
   total_price: number;
   status: string;
-  payment_method?: 'cod' | 'momo' | 'qr';
+  payment_method?: 'cod' | 'momo' | 'vnpay';
   payment_status?: 'pending' | 'paid' | 'failed';
   shipping_address: string;
   city: string;
@@ -29,6 +30,22 @@ interface Order {
 }
 
 export const OrderDetail = () => {
+    // Xử lý thanh toán lại với VNPAY
+    const handleRetryVnpay = async () => {
+      if (!order) return;
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/order/vnpay/create-payment/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: order.id }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Lỗi tạo VNPAY');
+        window.location.href = data.payUrl;
+      } catch (err) {
+        alert((err as Error).message);
+      }
+    };
   const { orderId } = useParams<{ orderId: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -128,7 +145,7 @@ export const OrderDetail = () => {
   const getPaymentMethodLabel = (method?: string) => {
     switch (method) {
       case 'momo': return 'Ví MoMo';
-      case 'qr':   return 'Chuyển khoản';
+      case 'vnpay': return 'VNPAY';
       default:     return 'Tiền mặt (COD)';
     }
   };
@@ -298,12 +315,21 @@ export const OrderDetail = () => {
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     {getPaymentStatusBadge(order.payment_status)}
+                    {/* Nút tiếp tục thanh toán nếu chưa thanh toán thành công */}
                     {order.payment_method === 'momo' && order.payment_status !== 'paid' && (
                       <button
                         onClick={handleRetryMomo}
                         className="text-xs underline text-indigo-600 dark:text-indigo-400 hover:no-underline"
                       >
-                        Thanh toán ngay
+                        Thanh toán MoMo
+                      </button>
+                    )}
+                    {order.payment_method === 'vnpay' && order.payment_status !== 'paid' && (
+                      <button
+                        onClick={handleRetryVnpay}
+                        className="text-xs underline text-indigo-600 dark:text-indigo-400 hover:no-underline"
+                      >
+                        Thanh toán VNPAY
                       </button>
                     )}
                   </div>

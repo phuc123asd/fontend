@@ -37,6 +37,7 @@ export const Checkout = () => {
   
   const [paymentInfo, setPaymentInfo] = useState({
     method: 'cod',
+    vnpay: '', // Thêm trường vnpay nếu chọn VNPAY
   });
 
   // useEffect được đơn giản hóa, chỉ còn nhiệm vụ điền form
@@ -120,6 +121,18 @@ export const Checkout = () => {
         if (!momoData.payUrl) throw new Error('Không nhận được link thanh toán từ MoMo');
         // Redirect sang trang thanh toán MoMo sandbox
         window.location.href = momoData.payUrl;
+        return;
+      } else if (paymentInfo.method === 'vnpay') {
+        showNotification('success', 'Đang tạo liên kết thanh toán VNPAY...');
+        const vnpayRes = await fetch(`${import.meta.env.VITE_API_URL}/order/vnpay/create-payment/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: order.id }),
+        });
+        const vnpayData = await vnpayRes.json();
+        if (!vnpayRes.ok) throw new Error(vnpayData.error || 'Không thể tạo thanh toán VNPAY');
+        if (!vnpayData.payUrl) throw new Error('Không nhận được link thanh toán từ VNPAY');
+        window.location.href = vnpayData.payUrl;
         return;
 
       } else {
@@ -347,7 +360,7 @@ export const Checkout = () => {
                             ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' 
                             : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
                         }`}
-                        onClick={() => setPaymentInfo({ ...paymentInfo, method: 'cod' })}
+                        onClick={() => setPaymentInfo({ ...paymentInfo, method: 'cod', vnpay: '' })}
                       >
                         <div className="flex flex-col items-center">
                           <DollarSignIcon className="w-8 h-8 text-indigo-600 mb-2" />
@@ -370,7 +383,7 @@ export const Checkout = () => {
                             ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' 
                             : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
                         }`}
-                        onClick={() => setPaymentInfo({ ...paymentInfo, method: 'momo' })}
+                        onClick={() => setPaymentInfo({ ...paymentInfo, method: 'momo', vnpay: '' })}
                       >
                         <div className="flex flex-col items-center">
                           <SmartphoneIcon className="w-8 h-8 text-indigo-600 mb-2" />
@@ -386,30 +399,30 @@ export const Checkout = () => {
                         )}
                       </div>
 
-                    </div>
-
-                    {/* Hiển thị thông tin bổ sung theo từng phương thức */}
-                    {paymentInfo.method === 'momo' && (
-                      <div className="mt-4 p-4 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800 rounded-lg">
-                        <div className="flex items-start gap-3">
-                          <SmartphoneIcon className="w-5 h-5 text-pink-600 dark:text-pink-400 mt-0.5 shrink-0" />
-                          <div className="w-full">
-                            <p className="text-sm font-semibold text-pink-700 dark:text-pink-300 mb-2">
-                              Hướng dẫn thanh toán MoMo (Sandbox)
-                            </p>
-                            <p className="text-xs text-pink-600 dark:text-pink-400 mb-2">
-                              Chọn <strong>Ngân hàng</strong> trên trang MoMo, nhập thông tin thẻ test:
-                            </p>
-                            <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-xs font-mono space-y-1 text-gray-700 dark:text-gray-300">
-                              <div className="flex justify-between"><span className="text-gray-500">Số thẻ:</span> <strong>9704 0000 0000 0018</strong></div>
-                              <div className="flex justify-between"><span className="text-gray-500">Tên:</span> <strong>NGUYEN VAN A</strong></div>
-                              <div className="flex justify-between"><span className="text-gray-500">Ngày phát hành:</span> <strong>03/07</strong></div>
-                              <div className="flex justify-between"><span className="text-gray-500">OTP:</span> <strong>otp</strong></div>
-                            </div>
-                          </div>
+                      {/* Thanh toán qua VNPAY */}
+                      <div 
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                          paymentInfo.method === 'vnpay' 
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                        }`}
+                        onClick={() => setPaymentInfo({ ...paymentInfo, method: 'vnpay' })}
+                      >
+                        <div className="flex flex-col items-center">
+                          <DollarSignIcon className="w-8 h-8 text-blue-600 mb-2" />
+                          <h3 className="font-medium text-gray-900 dark:text-white">VNPAY</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-1">
+                            Thanh toán qua cổng VNPAY (ATM, QR, thẻ quốc tế)
+                          </p>
                         </div>
+                        {paymentInfo.method === 'vnpay' && (
+                          <div className="mt-2 flex justify-center">
+                            <CheckCircleIcon className="w-5 h-5 text-blue-600" />
+                          </div>
+                        )}
                       </div>
-                    )}
+
+                    </div>
 
 
                   </div>

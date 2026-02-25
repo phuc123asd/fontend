@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useWishlist } from '../contexts/WishlistContext';
+// import { useWishlist } from '../contexts/WishlistContext';
 import { useReviews } from '../contexts/ReviewContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
@@ -114,48 +114,7 @@ interface Product {
   isNew: boolean;
 }
 
-// Mock product data - dùng fallback nếu API fail
-const productData: Record<number, Product> = {
-  1: {
-    id: 1,
-    name: 'iPhone 15 Pro',
-    price: 999,
-    originalPrice: 1099,
-    image: 'https://picsum.photos/seed/iphone15/800/600.jpg',
-    images: [
-      'https://picsum.photos/seed/iphone15-1/800/600.jpg',
-      'https://picsum.photos/seed/iphone15-2/800/600.jpg',
-      'https://picsum.photos/seed/iphone15-3/800/600.jpg'
-    ],
-    rating: 4.8,
-    reviewCount: 256,
-    category: 'Smartphones',
-    brand: 'Apple',
-    description:
-      'iPhone 15 Pro mang đến thiết kế titanium tuyệt đẹp, chip A17 Pro và hệ thống camera tiên tiến. Trải nghiệm sức mạnh nhiếp ảnh chuyên nghiệp trong túi của bạn.',
-    features: [
-      'Chip A17 Pro cho hiệu suất cực nhanh',
-      'Hệ thống camera Pro với camera chính 48MP',
-      'Thiết kế titanium với Ceramic Shield',
-      'Nút hành động cho phím tắt nhanh',
-      'Kết nối USB-C',
-      'Pin dùng cả ngày',
-    ],
-    specifications: {
-      Display: 'Màn hình Super Retina XDR 6.1 inch',
-      Chip: 'Chip A17 Pro',
-      Camera: '48MP Chính | 12MP Siêu rộng | 12MP Telephoto',
-      Battery: 'Phát lại video lên đến 23 giờ',
-      Storage: '128GB, 256GB, 512GB, 1TB',
-      Colors: 'Titanium Tự Nhiên, Titanium Xanh, Titanium Trắng, Titanium Đen',
-    },
-    inStock: true,
-    hasARView: true,
-    isNew: true,
-    colors: ['Titanium Tự Nhiên', 'Titanium Xanh', 'Titanium Trắng', 'Titanium Đen'],
-    stock: 999,
-  },
-};
+// ...existing code...
 
 const defaultProduct: Product = {
   id: 1,
@@ -412,8 +371,7 @@ export const ProductDetail: React.FC = () => {
       } catch (err) {
         console.error('Fetch product error:', err);
         setError(`Không thể tải sản phẩm: ${(err as Error).message}. Sử dụng dữ liệu mẫu.`);
-        const fallback = productData[productIdNumeric] || defaultProduct;
-        setProduct(fallback);
+        setProduct(defaultProduct);
         
         // Vẫn thử tải reviews với ID gốc
         fetchReviews(paramId);

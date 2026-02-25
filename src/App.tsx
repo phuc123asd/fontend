@@ -19,6 +19,7 @@ import { OrderDetail } from './pages/OrderDetail';
 import { Orders } from './pages/Orders';
 import { Profile } from './pages/Profile';
 import { MomoReturn } from './pages/MomoReturn';
+import { VnpayReturn } from './pages/VnpayReturn';
 export function App() {
   return <ThemeProvider>
       <AuthProvider>
@@ -42,6 +43,7 @@ export function App() {
                     <Route path="/orders/:orderId" element={<OrderDetail />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/momo-return" element={<MomoReturn />} />
+                    <Route path="/vnpay-return" element={<VnpayReturn />} />
                     <Route path="*" element={<Home />} />
                   </Routes>
                 </Layout>

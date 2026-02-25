@@ -19,6 +19,16 @@ export const MomoReturn = () => {
     const msg          = searchParams.get('message') ?? '';
     const amountParam  = searchParams.get('amount') ?? '';
 
+    // Log các params nhận được từ Momo
+    // eslint-disable-next-line no-console
+    console.log('MomoReturn params:', {
+      resultCode,
+      momoOrderId,
+      msg,
+      amountParam,
+      searchParams: Object.fromEntries(searchParams)
+    });
+
     // Lấy original order_id (bỏ phần _timestamp ở cuối)
     const parts = momoOrderId.split('_');
     const originalOrderId = parts.length > 1 ? parts.slice(0, -1).join('_') : momoOrderId;
@@ -29,26 +39,36 @@ export const MomoReturn = () => {
 
     // Gửi toàn bộ params về backend để xác thực chữ ký & cập nhật payment_status
     const confirmPayment = async () => {
+      setState('loading');
       try {
         const params: Record<string, string> = {};
         searchParams.forEach((v, k) => { params[k] = v; });
-        await fetch(`${import.meta.env.VITE_API_URL}/order/momo/confirm-payment/`, {
+        // Log params gửi về backend
+        // eslint-disable-next-line no-console
+        console.log('MomoReturn gửi confirm-payment:', params);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/order/momo/confirm-payment/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(params),
         });
-      } catch {
-        // Không block UI nếu lỗi
+        const data = await res.json();
+        if (!res.ok) {
+          setMessage(data.error || 'Xác nhận thanh toán thất bại.');
+          setState('failed');
+        } else {
+          setMessage(msg || data.message || '');
+          setState(resultCode === '0' ? 'success' : 'failed');
+        }
+        // Log kết quả xác nhận
+        // eslint-disable-next-line no-console
+        console.log('Momo confirm-payment:', data);
+      } catch (err) {
+        setMessage('Lỗi xác nhận thanh toán. Vui lòng thử lại.');
+        setState('failed');
       }
     };
 
-    if (resultCode === '0') {
-      setState('success');
-      confirmPayment();
-    } else {
-      setState('failed');
-      confirmPayment(); // Cập nhật failed cũng cần thiết
-    }
+    confirmPayment();
   }, [searchParams]);
 
   const formatAmount = (vnd: string) => {
