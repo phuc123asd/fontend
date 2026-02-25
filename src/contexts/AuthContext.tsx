@@ -43,6 +43,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   googleLogin: (credential: string) => Promise<void>;
   githubLogin: () => Promise<void>;
+  completeSocialLogin: (id: string, email?: string, role?: 'customer' | 'admin') => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
@@ -169,6 +170,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     window.location.href = githubAuthUrl;
+  };
+
+  const completeSocialLogin = async (
+    id: string,
+    email = '',
+    role: 'customer' | 'admin' = 'customer'
+  ) => {
+    if (!id) {
+      throw new Error('Thiếu user id từ OAuth callback');
+    }
+
+    setIsLoading(true);
+    try {
+      const basicUser: User = {
+        _id: id,
+        id,
+        email,
+        role,
+        avatar: email
+          ? `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(email)}`
+          : undefined,
+      };
+      setUser(basicUser);
+      await fetchUserInfoAfterLogin(id);
+    } catch (error) {
+      console.error('Complete social login error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const register = async (name: string, email: string, password: string) => {
@@ -357,6 +388,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login, 
         googleLogin,
         githubLogin,
+        completeSocialLogin,
         register, 
         logout, 
         updateUser, 

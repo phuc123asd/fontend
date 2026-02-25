@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
@@ -40,9 +40,44 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, googleLogin, githubLogin } = useAuth();
+  const { login, googleLogin, githubLogin, completeSocialLogin } = useAuth();
   const navigate = useNavigate();
   const googleButtonContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const githubStatus = params.get('github');
+    if (!githubStatus) return;
+
+    if (githubStatus === 'error') {
+      const message = params.get('message') || 'Đăng nhập GitHub thất bại.';
+      setError(message);
+      return;
+    }
+
+    if (githubStatus === 'success') {
+      const id = params.get('id') || '';
+      const email = params.get('email') || '';
+      if (!id) {
+        setError('Thiếu user id từ GitHub callback.');
+        return;
+      }
+
+      const run = async () => {
+        try {
+          setIsLoading(true);
+          setError('');
+          await completeSocialLogin(id, email, 'customer');
+          navigate('/', { replace: true });
+        } catch (err) {
+          setError('Không thể hoàn tất đăng nhập GitHub.');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      void run();
+    }
+  }, [completeSocialLogin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
