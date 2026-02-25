@@ -42,6 +42,7 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   googleLogin: (credential: string) => Promise<void>;
+  githubLogin: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
@@ -156,6 +157,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const githubLogin = async () => {
+    const githubAuthUrl =
+      (import.meta.env.VITE_GITHUB_AUTH_URL as string | undefined)?.trim() ||
+      `${import.meta.env.VITE_API_URL}/customer/github-login/`;
+
+    if (!githubAuthUrl) {
+      throw new Error('Thiếu cấu hình GitHub OAuth URL');
+    }
+
+    window.location.href = githubAuthUrl;
   };
 
   const register = async (name: string, email: string, password: string) => {
@@ -343,6 +356,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         user, 
         login, 
         googleLogin,
+        githubLogin,
         register, 
         logout, 
         updateUser, 

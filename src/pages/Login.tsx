@@ -1,17 +1,48 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { MailIcon, LockIcon, AlertCircleIcon } from 'lucide-react';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 
+const GoogleIcon = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <path
+      fill="#4285F4"
+      d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.29h6.44a5.5 5.5 0 0 1-2.39 3.61v3h3.86c2.26-2.08 3.58-5.15 3.58-8.63Z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 24c3.24 0 5.96-1.08 7.95-2.91l-3.86-3A7.17 7.17 0 0 1 12 19.34a7.2 7.2 0 0 1-6.75-4.96h-4v3.12A12 12 0 0 0 12 24Z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.25 14.38a7.22 7.22 0 0 1 0-4.76V6.5h-4a12 12 0 0 0 0 11l4-3.12Z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 4.66c1.76 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.08 15.24 0 12 0A12 12 0 0 0 1.25 6.5l4 3.12A7.2 7.2 0 0 1 12 4.66Z"
+    />
+  </svg>
+);
+
+const GithubMarkIcon = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <path
+      fill="currentColor"
+      d="M12 .5C5.65.5.5 5.66.5 12.02c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.27-.01-1.01-.02-1.98-3.2.7-3.88-1.54-3.88-1.54-.52-1.34-1.28-1.69-1.28-1.69-1.04-.71.08-.69.08-.69 1.16.08 1.77 1.2 1.77 1.2 1.02 1.76 2.69 1.25 3.35.95.1-.74.4-1.24.72-1.53-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .96-.31 3.15 1.19.92-.26 1.9-.39 2.88-.39s1.96.13 2.88.39c2.19-1.5 3.15-1.19 3.15-1.19.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.25 5.67.41.36.78 1.05.78 2.12 0 1.54-.01 2.78-.01 3.16 0 .31.21.68.8.56A11.52 11.52 0 0 0 23.5 12.02C23.5 5.66 18.35.5 12 .5Z"
+    />
+  </svg>
+);
+
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, googleLogin } = useAuth();
+  const { login, googleLogin, githubLogin } = useAuth();
   const navigate = useNavigate();
+  const googleButtonContainerRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +79,26 @@ export const Login = () => {
 
   const handleGoogleError = () => {
     setError('Đăng nhập Google thất bại');
+  };
+
+  const handleGoogleLoginClick = () => {
+    const googleRealButton = googleButtonContainerRef.current?.querySelector('[role="button"]') as HTMLElement | null;
+    if (!googleRealButton) {
+      setError('Google OAuth chưa sẵn sàng. Vui lòng thử lại.');
+      return;
+    }
+    googleRealButton.click();
+  };
+
+  const handleGithubLogin = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      await githubLogin();
+    } catch (err) {
+      setIsLoading(false);
+      setError('Đăng nhập GitHub thất bại. Vui lòng thử lại.');
+    }
   };
 
   return <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -116,14 +167,37 @@ export const Login = () => {
           </div>
 
           <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              theme="outline"
-              size="large"
-              text="signin_with"
-              shape="rectangular"
-            />
+            <button
+              type="button"
+              onClick={handleGoogleLoginClick}
+              disabled={isLoading}
+              className="w-[322px] max-w-full h-10 inline-flex items-center justify-center gap-2 rounded-[4px] border border-[#dadce0] bg-white px-3 text-[16px] font-medium text-[#3c4043] shadow-none transition-colors hover:bg-[#f8f9fa] disabled:opacity-60 disabled:cursor-not-allowed dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+            >
+              <GoogleIcon />
+              <span>Đăng nhập bằng Google</span>
+            </button>
+            <div ref={googleButtonContainerRef} className="absolute opacity-0 pointer-events-none h-0 w-0 overflow-hidden" aria-hidden="true">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                theme="outline"
+                size="large"
+                text="signin_with"
+                shape="rectangular"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={handleGithubLogin}
+              disabled={isLoading}
+              className="w-[322px] max-w-full h-10 inline-flex items-center justify-center gap-2 rounded-[4px] border border-[#dadce0] bg-white px-3 text-[16px] font-medium text-[#3c4043] shadow-none transition-colors hover:bg-[#f8f9fa] disabled:opacity-60 disabled:cursor-not-allowed dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+            >
+              <GithubMarkIcon />
+              <span>Đăng nhập bằng GitHub</span>
+            </button>
           </div>
         </form>
       </div>
