@@ -4,25 +4,7 @@ import { FacebookIcon, TwitterIcon, InstagramIcon, YoutubeIcon, MapPinIcon, Phon
 export const Footer = () => {
   return <footer className="bg-gray-100 dark:bg-gray-900 pt-12 pb-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Newsletter */}
-        <div className="mb-12 p-6 bg-indigo-600 dark:bg-indigo-700 rounded-xl shadow-lg">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div className="mb-6 md:mb-0">
-              <h3 className="text-xl font-bold text-white mb-2">
-                Đăng ký nhận tin
-              </h3>
-              <p className="text-indigo-100">
-                Nhận tin tức mới nhất và ưu đãi độc quyền
-              </p>
-            </div>
-            <div className="flex w-full md:w-auto">
-              <input type="email" placeholder="Email của bạn" className="flex-grow px-4 py-3 rounded-l-lg focus:outline-none" aria-label="Email address" />
-              <button className="px-6 py-3 bg-gray-900 hover:bg-black text-white font-medium rounded-r-lg transition-colors" aria-label="Subscribe">
-                Đăng ký
-              </button>
-            </div>
-          </div>
-        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}
           <div>
