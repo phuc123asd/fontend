@@ -153,7 +153,7 @@ function normalizeProduct(apiData: ApiProduct): Product {
     price: Number(apiData.price) || defaultProduct.price,
     originalPrice: Number(apiData.originalPrice) || defaultProduct.originalPrice,
     image: apiData.image || defaultProduct.image,
-    images: detail.images || [defaultProduct.image],
+    images: (detail.images && detail.images.length > 0) ? detail.images : [apiData.image || defaultProduct.image],
     rating: detail.rating ?? apiData.rating ?? defaultProduct.rating,
     reviewCount: detail.reviewCount ?? defaultProduct.reviewCount,
     category: apiData.category || defaultProduct.category,

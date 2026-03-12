@@ -37,7 +37,7 @@ export const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState('Tất Cả');
   const [selectedBrand, setSelectedBrand] = useState('Tất Cả');
   const [selectedSort, setSelectedSort] = useState('Nổi Bật');
-  const [priceRange, setPriceRange] = useState([0, 2500]);
+  const [priceRange, setPriceRange] = useState([0, 200000000]);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>(defaultProducts);
@@ -335,17 +335,17 @@ export const Shop = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      ${priceRange[0]}
+                      {priceRange[0].toLocaleString()} ₫
                     </span>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      ${priceRange[1]}
+                      {priceRange[1].toLocaleString()} ₫
                     </span>
                   </div>
                   <input 
                     type="range" 
                     min="0" 
-                    max="2500" 
-                    step="100" 
+                    max="200000000" 
+                    step="500000" 
                     value={priceRange[1]} 
                     onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])} 
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" 
@@ -443,17 +443,17 @@ export const Shop = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        ${priceRange[0]}
+                        {priceRange[0].toLocaleString()} ₫
                       </span>
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        ${priceRange[1]}
+                        {priceRange[1].toLocaleString()} ₫
                       </span>
                     </div>
                     <input 
                       type="range" 
                       min="0" 
-                      max="2500" 
-                      step="100" 
+                      max="200000000" 
+                      step="500000" 
                       value={priceRange[1]} 
                       onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])} 
                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" 
