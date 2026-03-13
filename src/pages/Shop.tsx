@@ -37,7 +37,7 @@ export const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState('Tất Cả');
   const [selectedBrand, setSelectedBrand] = useState('Tất Cả');
   const [selectedSort, setSelectedSort] = useState('Nổi Bật');
-  const [priceRange, setPriceRange] = useState([0, 200000000]);
+  const [priceRange, setPriceRange] = useState([0, 20000]);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>(defaultProducts);
@@ -335,17 +335,17 @@ export const Shop = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {priceRange[0].toLocaleString()} ₫
+                      ${priceRange[0].toLocaleString()}
                     </span>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {priceRange[1].toLocaleString()} ₫
+                      ${priceRange[1].toLocaleString()}
                     </span>
                   </div>
                   <input 
                     type="range" 
                     min="0" 
-                    max="200000000" 
-                    step="500000" 
+                    max="20000" 
+                    step="50" 
                     value={priceRange[1]} 
                     onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])} 
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" 
@@ -375,7 +375,7 @@ export const Shop = () => {
                   onClick={() => {
                     setSelectedCategory('Tất Cả');
                     setSelectedBrand('Tất Cả');
-                    setPriceRange([0, 2500]);
+                    setPriceRange([0, 20000]);
                   }}
                 >
                   Xóa tất cả bộ lọc
@@ -443,17 +443,17 @@ export const Shop = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {priceRange[0].toLocaleString()} ₫
+                        ${priceRange[0].toLocaleString()}
                       </span>
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {priceRange[1].toLocaleString()} ₫
+                        ${priceRange[1].toLocaleString()}
                       </span>
                     </div>
                     <input 
                       type="range" 
                       min="0" 
-                      max="200000000" 
-                      step="500000" 
+                      max="20000" 
+                      step="50" 
                       value={priceRange[1]} 
                       onChange={e => setPriceRange([priceRange[0], parseInt(e.target.value)])} 
                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" 
@@ -514,7 +514,7 @@ export const Shop = () => {
                 <Button onClick={() => {
                   setSelectedCategory('Tất Cả');
                   setSelectedBrand('Tất Cả');
-                  setPriceRange([0, 2500]);
+                  setPriceRange([0, 20000]);
                 }}>
                   Xóa Bộ Lọc
                 </Button>
