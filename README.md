@@ -1,7 +1,3 @@
-<p align="center">
-<img src="demo/banner.png" width="900">
-</p>
-
 <h1 align="center">🛍 TechHub — Modern AI E-commerce Platform</h1>
 
 <p align="center">
@@ -38,35 +34,9 @@ TechHub is designed to demonstrate a **modern scalable e-commerce frontend archi
 ## Video Demo
 
 <p align="center">
-<a href="https://youtu.be/YOUR_VIDEO_ID">
-<img src="https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg" width="800">
+<a href="https://youtu.be/6nsplf93BaE">
+<img src="https://img.youtube.com/vi/6nsplf93BaE/0.jpg" width="800">
 </a>
-</p>
-
----
-
-# 🖼 UI Screenshots
-
-## Home Page
-
-<p align="center">
-<img src="demo/home.png" width="800">
-</p>
-
----
-
-## Product Detail
-
-<p align="center">
-<img src="demo/product.png" width="800">
-</p>
-
----
-
-## Shopping Cart
-
-<p align="center">
-<img src="demo/cart.png" width="800">
 </p>
 
 ---
