@@ -42,8 +42,6 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   googleLogin: (credential: string) => Promise<void>;
-  githubLogin: () => Promise<void>;
-  completeSocialLogin: (id: string, email?: string, role?: 'customer' | 'admin') => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
@@ -154,48 +152,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await fetchUserInfoAfterLogin(data.id);
     } catch (error) {
       console.error('Google login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const githubLogin = async () => {
-    const githubAuthUrl =
-      (import.meta.env.VITE_GITHUB_AUTH_URL as string | undefined)?.trim() ||
-      `${import.meta.env.VITE_API_URL}/customer/github-login/`;
-
-    if (!githubAuthUrl) {
-      throw new Error('Thiếu cấu hình GitHub OAuth URL');
-    }
-
-    window.location.href = githubAuthUrl;
-  };
-
-  const completeSocialLogin = async (
-    id: string,
-    email = '',
-    role: 'customer' | 'admin' = 'customer'
-  ) => {
-    if (!id) {
-      throw new Error('Thiếu user id từ OAuth callback');
-    }
-
-    setIsLoading(true);
-    try {
-      const basicUser: User = {
-        _id: id,
-        id,
-        email,
-        role,
-        avatar: email
-          ? `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(email)}`
-          : undefined,
-      };
-      setUser(basicUser);
-      await fetchUserInfoAfterLogin(id);
-    } catch (error) {
-      console.error('Complete social login error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -387,8 +343,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         user, 
         login, 
         googleLogin,
-        githubLogin,
-        completeSocialLogin,
         register, 
         logout, 
         updateUser, 
