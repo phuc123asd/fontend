@@ -10,10 +10,6 @@ interface Message {
   isError?: boolean;
 }
 
-interface QuickAction {
-  label: string;
-  query: string;
-}
 
 // --- Constants ---
 const initialBotMessage: Message = {
@@ -23,14 +19,6 @@ const initialBotMessage: Message = {
   timestamp: new Date(),
 };
 
-const quickActions: QuickAction[] = [
-  { label: '📦 Thông tin giao hàng', query: 'Cho tôi biết về chính sách giao hàng' },
-  { label: '↩️ Chính sách đổi trả', query: 'Chính sách đổi trả như thế nào?' },
-  { label: '🛡️ Bảo hành', query: 'Sản phẩm được bảo hành bao lâu?' },
-  { label: '💳 Thanh toán', query: 'Các hình thức thanh toán' },
-  { label: '📱 Tư vấn sản phẩm', query: 'Tôi muốn tư vấn về điện thoại' },
-  { label: '💰 Khuyến mãi', query: 'Có khuyến mãi gì không?' }
-];
 
 // --- Sub-components ---
 
@@ -107,23 +95,6 @@ const MessageBubble = ({ message, onRetry, onCopy }: {
   );
 };
 
-// Component các hành động nhanh
-const QuickActionsComponent = ({ actions, onActionClick }: { actions: QuickAction[], onActionClick: (query: string) => void }) => (
-  <div className="space-y-2">
-    <p className="text-xs text-gray-500 dark:text-gray-400 text-center">Câu hỏi nhanh:</p>
-    <div className="grid grid-cols-2 gap-2">
-      {actions.map((action) => (
-        <button
-          key={action.query}
-          onClick={() => onActionClick(action.query)}
-          className="text-xs bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-indigo-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 transition-colors"
-        >
-          {action.label}
-        </button>
-      ))}
-    </div>
-  </div>
-);
 
 // Component nhập liệu
 const ChatInput = ({ input, setInput, onSend, isTyping }: { 
@@ -303,7 +274,6 @@ export const Chatbot = () => {
               </div>
             )}
 
-            {messages.length <= 2 && <QuickActionsComponent actions={quickActions} onActionClick={sendMessage} />}
             
             <div ref={messagesEndRef} />
           </div>
